@@ -32,26 +32,32 @@ export default function Footer() {
               <h4 className="text-base sm:text-lg font-bold text-mdb-blue mb-3 sm:mb-4">Pages</h4>
               <div className="space-y-1 sm:space-y-2">
                 <Link 
+                  href="/" 
+                  className="block text-gray-700 hover:text-mdb-blue transition-all duration-200 text-sm sm:text-base hover:scale-110"
+                >
+                  Home
+                </Link>
+                <Link 
                   href="/about" 
-                  className="block text-gray-700 hover:text-mdb-blue transition-colors duration-200 text-sm sm:text-base"
+                  className="block text-gray-700 hover:text-mdb-blue transition-all duration-200 text-sm sm:text-base hover:scale-110"
                 >
                   About
                 </Link>
                 <Link 
                   href="/projects" 
-                  className="block text-gray-700 hover:text-mdb-blue transition-colors duration-200 text-sm sm:text-base"
+                  className="block text-gray-700 hover:text-mdb-blue transition-all duration-200 text-sm sm:text-base hover:scale-110"
                 >
                   Projects
                 </Link>
                 <Link 
                   href="/training-program" 
-                  className="block text-gray-700 hover:text-mdb-blue transition-colors duration-200 text-sm sm:text-base"
+                  className="block text-gray-700 hover:text-mdb-blue transition-all duration-200 text-sm sm:text-base hover:scale-110"
                 >
                   Training Program
                 </Link>
                 <Link 
                   href="/apply" 
-                  className="block text-gray-700 hover:text-mdb-blue transition-colors duration-200 text-sm sm:text-base"
+                  className="block text-gray-700 hover:text-mdb-blue transition-all duration-200 text-sm sm:text-base hover:scale-110"
                 >
                   Apply
                 </Link>
@@ -64,13 +70,13 @@ export default function Footer() {
               <div className="space-y-1 sm:space-y-2">
                 <Link 
                   href="/contact" 
-                  className="block text-gray-700 hover:text-mdb-blue transition-colors duration-200 text-sm sm:text-base"
+                  className="block text-gray-700 hover:text-mdb-blue transition-all duration-200 text-sm sm:text-base hover:scale-110"
                 >
                   Contact Us
                 </Link>
                 <a 
                   href="mailto:contact@mdb.berkeley.edu" 
-                  className="block text-gray-700 hover:text-mdb-blue transition-colors duration-200 text-sm sm:text-base"
+                  className="block text-gray-700 hover:text-mdb-blue transition-all duration-200 text-sm sm:text-base hover:scale-110"
                 >
                   Email
                 </a>
