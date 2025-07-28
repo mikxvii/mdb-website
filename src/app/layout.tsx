@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import Header from './components/Header'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -15,39 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-gray-50">
-        <header className="bg-blue-600 text-white shadow-lg">
-          <nav className="container mx-auto px-4 py-4">
-            <div className="flex justify-between items-center">
-              <Link href="/" className="text-2xl font-bold hover:text-blue-200">
-                MDB Website
-              </Link>
-              <ul className="flex space-x-8">
-                <li>
-                  <Link href="/" className="hover:text-blue-200 transition-colors">
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/about" className="hover:text-blue-200 transition-colors">
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/services" className="hover:text-blue-200 transition-colors">
-                    Services
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className="hover:text-blue-200 transition-colors">
-                    Contact
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </nav>
-        </header>
+        <Header />
         
-        <main className="flex-grow">
+        <main className="flex-grow pt-20">
           {children}
         </main>
         
