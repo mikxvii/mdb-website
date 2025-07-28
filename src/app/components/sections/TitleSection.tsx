@@ -5,6 +5,12 @@ import { useState, useEffect } from 'react'
 
 export default function TitleSection() {
   const [isLoaded, setIsLoaded] = useState(false)
+  const [currentWordIndex, setCurrentWordIndex] = useState(0)
+  const [currentText, setCurrentText] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [typeSpeed, setTypeSpeed] = useState(100)
+
+  const words = ['MDB.', 'a Community.', 'Chillers.', 'a Network.', 'Tight-knit.', 'Tuff.', 'Diverse.', 'Creators.', 'MDBesties.', 'Developers.', 'Brainrotted.', 'Family.']
 
   useEffect(() => {
     // Trigger animation on next frame to prevent flash
@@ -14,6 +20,38 @@ export default function TitleSection() {
     
     return () => cancelAnimationFrame(timer)
   }, [])
+
+  useEffect(() => {
+    const currentWord = words[currentWordIndex]
+    
+    const handleType = () => {
+      if (isDeleting) {
+        // Backspace effect
+        setCurrentText(currentWord.substring(0, currentText.length - 1))
+        setTypeSpeed(50) // Faster deletion
+        
+        if (currentText === '') {
+          setIsDeleting(false)
+          setCurrentWordIndex((prev) => (prev + 1) % words.length)
+          setTypeSpeed(100) // Normal typing speed
+        }
+      } else {
+        // Typing effect
+        setCurrentText(currentWord.substring(0, currentText.length + 1))
+        setTypeSpeed(100)
+        
+        if (currentText === currentWord) {
+          // Pause before starting to delete
+          setTimeout(() => setIsDeleting(true), 2000)
+          return
+        }
+      }
+    }
+
+    const timer = setTimeout(handleType, typeSpeed)
+    return () => clearTimeout(timer)
+  }, [currentText, isDeleting, currentWordIndex, typeSpeed, words])
+
   return (
     <section className="min-h-screen w-screen bg-gradient-to-b from-mdb-light-blue to-white flex items-center -mt-20 relative mb-0 py-8 md:py-12 lg:py-16">
       <div className="absolute inset-0 bg-gradient-to-b from-mdb-light-blue to-white z-0"></div>
@@ -43,7 +81,11 @@ export default function TitleSection() {
               : 'translate-y-8'
           }`}>
             <h1 className="text-[clamp(1.5rem,4.5vw,2.75rem)] md:text-[clamp(1.75rem,5.5vw,3.5rem)] lg:text-[clamp(2rem,6.5vw,4.5rem)] mb-6 text-mdb-blue font-inter-extrabold leading-tight">
-              We are MDB.
+              We are{' '}
+              <span className="inline-block">
+                {currentText}
+                <span className="animate-pulse text-mdb-blue">|</span>
+              </span>
             </h1>
             <p className="text-[clamp(0.85rem,2.2vw,1.05rem)] md:text-[clamp(0.875rem,2.5vw,1.125rem)] lg:text-[clamp(1rem,3vw,1.25rem)] mb-8 text-gray-700 leading-relaxed max-w-lg mx-auto lg:mx-0">
             MDB is a community of passionate and innovative mobile developers at UC Berkeley!
