@@ -9,11 +9,7 @@ export default function Home() {
       <TitleSection />
       <PurpAndComm />
       <Carousel />
-      <div className="w-full bg-gray-50 relative z-20 border-t border-gray-200">
-        <div className="container mx-auto px-4 py-16">
-          <Destinations />
-        </div>
-      </div>
+      <Destinations />
     </div>
   )
 } 
