@@ -10,6 +10,8 @@ module.exports = {
       fontFamily: {
         'raleway': ['Raleway', 'sans-serif'],
         'raleway-semibold': ['Raleway', 'sans-serif'],
+        'inter': ['Inter', 'sans-serif'],
+        'sans': ['Inter', 'sans-serif'], // Make Inter the default sans-serif
       },
       fontSize: {
         // Responsive font sizes
@@ -31,6 +33,15 @@ module.exports = {
         'raleway-semibold': '600',
         'raleway-bold': '700',
         'raleway-extrabold': '800',
+        'inter-thin': '100',
+        'inter-extralight': '200',
+        'inter-light': '300',
+        'inter-normal': '400',
+        'inter-medium': '500',
+        'inter-semibold': '600',
+        'inter-bold': '700',
+        'inter-extrabold': '800',
+        'inter-black': '900',
       },
       colors: {
         // Brand Colors
