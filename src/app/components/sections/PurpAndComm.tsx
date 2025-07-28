@@ -59,8 +59,9 @@ export default function PurpAndComm() {
   }, [isVisible])
 
   return (
-    <section ref={sectionRef} className="py-16 bg-white">
-      <div className="max-w-7xl mx-auto px-4">
+    <section ref={sectionRef} className="w-screen bg-gradient-to-b from-white to-mdb-light-blue py-16 relative left-1/2 -translate-x-1/2">
+      <div className="absolute inset-0 bg-gradient-to-b from-white to-mdb-light-blue z-0"></div>
+      <div className="max-w-7xl mx-auto px-4 relative z-10">
         
         {/* Our Purpose Section */}
         <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
@@ -78,7 +79,7 @@ export default function PurpAndComm() {
               alt="MDB Community at the beach"
               width={600}
               height={400}
-              className="w-full h-auto rounded-2xl shadow-lg"
+              className="w-full h-auto rounded-2xl shadow-lg hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-xl origin-center"
             />
           </div>
         </div>
@@ -132,7 +133,7 @@ export default function PurpAndComm() {
               alt="MDB Community gathering"
               width={600}
               height={400}
-              className="w-full h-auto rounded-2xl shadow-lg"
+              className="w-full h-auto rounded-2xl shadow-lg hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-xl origin-center"
             />
           </div>
           <div className="order-2 lg:order-2">
