@@ -1,89 +1,103 @@
 'use client'
-import { useState } from 'react'
+import { useRef, useEffect } from 'react'
+import Image from 'next/image'
 
 export default function Carousel() {
-  const [currentSlide, setCurrentSlide] = useState(0)
+  const carouselRef = useRef<HTMLDivElement>(null)
   
-  const slides = [
-    {
-      title: "Student Success Stories",
-      description: "See how our graduates have transformed their careers",
-      image: "🎓",
-      bgColor: "from-blue-500 to-purple-600"
-    },
-    {
-      title: "Industry Partnerships", 
-      description: "Connected with top tech companies for job placements",
-      image: "🤝",
-      bgColor: "from-green-500 to-blue-600"
-    },
-    {
-      title: "Cutting-Edge Curriculum",
-      description: "Learn the latest technologies and best practices",
-      image: "💻",
-      bgColor: "from-purple-500 to-pink-600"
-    }
+  const images = [
+    "/images/mdb8.jpg",
+    "/images/mdb-hawaii.jpg",
+    "/images/mdb-6flags.jpg",
+    "/images/mdb-newnite.jpg",
+    "/images/mdb8.jpg",
+    "/images/mdb-hawaii.jpg",
+    "/images/mdb8.jpg",
+    "/images/mdb-hawaii.jpg",
+    "/images/mdb8.jpg",
+    "/images/mdb-hawaii.jpg",
+    "/images/mdb8.jpg",
+    "/images/mdb-hawaii.jpg"
   ]
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length)
-  }
+  // Duplicate images for seamless infinite scroll
+  const duplicatedImages = [...images, ...images, ...images]
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
-  }
+  useEffect(() => {
+    const carousel = carouselRef.current
+    if (!carousel) return
+
+    let animationId: number
+    let translateX = 0
+    const speed = 1 // Increased speed for better visibility
+    const imageWidth = 432 // 400px width + 32px margin (mx-4 = 16px each side)
+
+    const animate = () => {
+      translateX -= speed
+      
+      // Reset position when we've scrolled through one full set of images
+      const totalWidth = imageWidth * images.length
+      if (Math.abs(translateX) >= totalWidth) {
+        translateX = 0
+      }
+      
+      carousel.style.transform = `translateX(${translateX}px)`
+      animationId = requestAnimationFrame(animate)
+    }
+
+    animationId = requestAnimationFrame(animate)
+
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId)
+      }
+    }
+  }, [images.length])
 
   return (
-    <section className="py-16 mb-16">
-      <h2 className="text-4xl font-bold text-center mb-12 text-gray-800">
-        Discover Our Impact
-      </h2>
+    <section className="py-16 bg-slate-100 overflow-hidden">
+      <div className="mb-16">
+        <h2 className="text-5xl font-bold text-center text-mdb-blue">
+          Carousel
+        </h2>
+      </div>
       
-      <div className="relative max-w-4xl mx-auto">
-        <div className="overflow-hidden rounded-xl shadow-2xl">
+      {/* Full-width continuous sliding strip with alternating heights */}
+      <div className="w-screen relative -mx-4 lg:-mx-8 xl:-mx-16">
+        <div className="overflow-hidden h-[500px]">
           <div 
-            className="flex transition-transform duration-500 ease-in-out"
-            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+            ref={carouselRef}
+            className="flex items-start"
+            style={{ 
+              width: 'fit-content',
+              willChange: 'transform' // Optimize for animations
+            }}
           >
-            {slides.map((slide, index) => (
-              <div
-                key={index}
-                className={`w-full flex-shrink-0 bg-gradient-to-r ${slide.bgColor} text-white p-16 text-center`}
+            {duplicatedImages.map((imageSrc, index) => (
+              <div 
+                key={index} 
+                className={`flex-shrink-0 w-[400px] h-[300px] relative mx-4 ${
+                  index % 2 === 0 
+                    ? 'mt-0' /* Even indices: top position */
+                    : 'mt-32' /* Odd indices: bottom position with 8rem (128px) offset */
+                }`}
               >
-                <div className="text-8xl mb-6">{slide.image}</div>
-                <h3 className="text-3xl font-bold mb-4">{slide.title}</h3>
-                <p className="text-xl opacity-90 max-w-2xl mx-auto">{slide.description}</p>
+                <Image
+                  src={imageSrc}
+                  alt={`MDB Community Photo ${index + 1}`}
+                  fill
+                  className="object-cover rounded-2xl"
+                  sizes="400px"
+                  priority={index < 6} // Prioritize first 6 images
+                />
               </div>
             ))}
           </div>
         </div>
-
-        {/* Navigation Buttons */}
-        <button
-          onClick={prevSlide}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur-sm transition-all"
-        >
-          ←
-        </button>
-        <button
-          onClick={nextSlide}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur-sm transition-all"
-        >
-          →
-        </button>
-
-        {/* Dots Indicator */}
-        <div className="flex justify-center mt-6 space-x-2">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all ${
-                currentSlide === index ? 'bg-blue-600' : 'bg-gray-300'
-              }`}
-            />
-          ))}
-        </div>
+        
+        {/* Gradient overlays for edge fade effect */}
+        <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-slate-100 to-transparent pointer-events-none"></div>
+        <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-slate-100 to-transparent pointer-events-none"></div>
       </div>
     </section>
   )
