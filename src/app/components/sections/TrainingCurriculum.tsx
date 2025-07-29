@@ -96,9 +96,16 @@ export default function TrainingCurriculum() {
             </div>
             
             <div className="text-center mt-12">
-              <button className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                Training Program Site
-              </button>
+              <div className="flex justify-center">
+                <a
+                  href="https://learn.mdb.dev"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block px-4 py-2 bg-mdb-blue text-white rounded-xl hover:bg-mdb-gold hover:text-mdb-blue hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-lg origin-center font-semibold min-w-[120px]"
+                >
+                  Training Program Site
+                </a>
+              </div>
             </div>
           </div>
         </div>

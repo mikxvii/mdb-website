@@ -40,9 +40,9 @@ export default function Clients({ client, className = '' }: ClientsProps) {
         </div>
         <Link 
           href={client.link}
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+          className="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-mdb-gold hover:text-mdb-blue transition-colors"
         >
-          Link
+          View
         </Link>
       </div>
 

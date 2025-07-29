@@ -48,7 +48,7 @@ export default function Header() {
               </Link>
             </li>
             <li>
-              <Link href="/apply" className="block px-4 py-2 bg-mdb-blue text-white rounded-xl hover:bg-mdb-blue/80 hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-lg origin-center">
+              <Link href="/apply" className="block px-4 py-2 bg-mdb-blue text-white rounded-xl hover:bg-mdb-gold hover:text-mdb-blue hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-lg origin-center">
                 Apply
               </Link>
             </li>

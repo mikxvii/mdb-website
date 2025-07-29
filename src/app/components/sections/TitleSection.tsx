@@ -96,7 +96,7 @@ export default function TitleSection() {
               {/* Apply Button */}
               <Link 
                 href="/apply"
-                className="bg-mdb-blue text-white px-6 md:px-8 py-3 md:py-3 rounded-xl font-semibold text-[clamp(0.6875rem,1.75vw,0.875rem)] hover:bg-mdb-blue/80 hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-lg origin-center flex items-center justify-center gap-2 min-w-[120px] md:min-w-[140px]"
+                className="bg-mdb-blue text-white px-6 md:px-8 py-3 md:py-3 rounded-xl font-semibold text-[clamp(0.6875rem,1.75vw,0.875rem)] hover:bg-mdb-gold hover:text-mdb-blue hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-lg origin-center flex items-center justify-center gap-2 min-w-[120px] md:min-w-[140px]"
               >
                 Apply Now
                 <span className="text-[clamp(0.75rem,1.75vw,1rem)]">→</span>
