@@ -83,7 +83,7 @@ export default function TrainingCurriculum() {
               {curriculumModules.map((module, index) => (
                 <div 
                   key={index} 
-                  className="glass-card p-8"
+                  className="mdb-glass mdb-glass-hover p-8"
                 >
                   <h3 className="text-xl font-bold text-gray-800 mb-3">
                     {module.week} - {module.title}

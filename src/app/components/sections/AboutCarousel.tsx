@@ -78,7 +78,7 @@ export default function AboutCarousel() {
             {cards.map((card, index) => (
               <div
                 key={index}
-                className="glass-card p-8 flex flex-col h-full"
+                className="mdb-glass mdb-glass-hover p-8 flex flex-col h-full"
               >
                 <div className="text-4xl mb-4 text-center">
                   {card.isImage ? (

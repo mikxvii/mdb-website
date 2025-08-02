@@ -34,7 +34,7 @@ export default function MemberDB({ name, title, image, size = 'medium', classNam
 
   return (
     <div className={`text-center hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-xl origin-center ${className}`}>
-      <div className={`glass-card relative mx-auto mb-3 overflow-hidden rounded-lg border-8 ${currentSize.container}`}>
+      <div className={`mdb-glass relative mx-auto mb-3 overflow-hidden rounded-lg border-8 ${currentSize.container}`}>
         <Image
           src={image}
           alt={name}

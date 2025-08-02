@@ -11,7 +11,7 @@ export default function Header() {
   }
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 bg-mdb-light-blue/40 text-mdb-blue shadow-2xl backdrop-blur-xl backdrop-saturate-150 border-b border-white/10">
+    <header className="fixed top-4 left-4 right-4 z-50 mdb-glass text-mdb-blue shadow-2xl backdrop-blur-xl backdrop-saturate-150 border-b border-white/10 rounded-2xl">
       <nav className="font-raleway-semibold container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
@@ -84,7 +84,7 @@ export default function Header() {
             ? 'max-h-96 opacity-100 mt-4' 
             : 'max-h-0 opacity-0 overflow-hidden'
         }`}>
-                     <ul className="flex flex-col space-y-4 py-4 bg-white/10 backdrop-blur-sm rounded-lg px-4 text-center">
+                     <ul className="flex flex-col space-y-4 py-4 mdb-glass backdrop-blur-sm rounded-lg px-4 text-center">
              <li>
                <Link 
                  href="/about" 

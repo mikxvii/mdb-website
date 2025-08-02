@@ -59,7 +59,7 @@ export default function Flyer() {
               ? 'translate-y-0' 
               : 'translate-y-8'
           }`}>
-            <div className="glass-card p-6">
+            <div className="mdb-glass mdb-glass-hover p-6">
               <div className="text-3xl mb-4">🎯</div>
               <h3 className="text-xl font-raleway-semibold text-mdb-blue mb-3">What We Do</h3>
               <p className="text-gray-700 leading-relaxed">
@@ -68,7 +68,7 @@ export default function Flyer() {
               </p>
             </div>
 
-            <div className="glass-card p-6">
+            <div className="mdb-glass mdb-glass-hover p-6">
               <div className="text-3xl mb-4">🚀</div>
               <h3 className="text-xl font-raleway-semibold text-mdb-blue mb-3">Why Join Us</h3>
               <p className="text-gray-700 leading-relaxed">
@@ -77,7 +77,7 @@ export default function Flyer() {
               </p>
             </div>
 
-            <div className="glass-card p-6 md:col-span-2 lg:col-span-1">
+            <div className="mdb-glass mdb-glass-hover p-6 md:col-span-2 lg:col-span-1">
               <div className="text-3xl mb-4">💡</div>
               <h3 className="text-xl font-raleway-semibold text-mdb-blue mb-3">What You'll Learn</h3>
               <p className="text-gray-700 leading-relaxed">
@@ -88,7 +88,7 @@ export default function Flyer() {
           </div>
 
           {/* Requirements */}
-          <div className={`glass-card-lg p-8 mb-12 transition-all duration-1000 ease-out delay-700 ${
+          <div className={`mdb-glass-lg p-8 mb-12 transition-all duration-1000 ease-out delay-700 ${
             isLoaded 
               ? 'translate-y-0' 
               : 'translate-y-8'

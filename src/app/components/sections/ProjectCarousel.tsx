@@ -68,7 +68,7 @@ export default function ProjectCarousel() {
             {projectPhases.map((phase, index) => (
               <div
                 key={index}
-                className="glass-card p-8 flex flex-col h-full"
+                className="mdb-glass mdb-glass-hover p-8 flex flex-col h-full"
               >
                 <div className="text-6xl mb-6 text-center">{phase.icon}</div>
                 <h3 className="text-2xl font-raleway-bold text-gray-800 mb-4 text-center">

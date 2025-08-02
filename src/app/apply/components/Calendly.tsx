@@ -16,7 +16,7 @@ export default function Calendly() {
         </div>
 
         {/* Calendly Integration Placeholder */}
-        <div className="glass-card-lg p-8">
+        <div className="mdb-glass-lg p-8">
           <div className="text-center">
             <div className="text-4xl mb-6">☕</div>
             <h3 className="text-xl font-raleway-semibold text-mdb-blue mb-4">

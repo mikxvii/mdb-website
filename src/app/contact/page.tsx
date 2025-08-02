@@ -37,7 +37,7 @@ export default function Contact() {
       <div className="absolute inset-0 bg-gradient-to-b from-mdb-light-blue via-white to-white z-0"></div>
       
       <div className="w-full max-w-2xl mx-auto px-4 relative z-10">
-        <div className={`glass-card-lg p-8 md:p-12 transition-all duration-1000 ease-out ${
+        <div className={`mdb-glass-lg p-8 md:p-12 transition-all duration-1000 ease-out ${
           isLoaded 
             ? 'opacity-100 translate-y-0' 
             : 'opacity-0 translate-y-8'
