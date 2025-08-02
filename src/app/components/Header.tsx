@@ -8,40 +8,81 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [clickedItem, setClickedItem] = useState<string | null>(null)
   const [bubblePosition, setBubblePosition] = useState({ left: 0, width: 0 })
+  const [isInitialized, setIsInitialized] = useState(false)
   const navRef = useRef<HTMLUListElement>(null)
   const itemRefs = useRef<{ [key: string]: HTMLAnchorElement | null }>({})
   const pathname = usePathname()
+  const lastActiveItem = useRef<string | null>(null)
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
   }
 
   const handleClick = (itemKey: string) => {
+    // Don't trigger bubble animations on home page
+    if (isHomePage) return
+    
     setClickedItem(itemKey)
-    updateBubblePosition(itemKey)
+    // Immediate update for smooth click transitions
+    updateBubblePositionImmediate(itemKey)
   }
 
-  const updateBubblePosition = (itemKey: string) => {
-    // Small delay to ensure DOM is ready
-    requestAnimationFrame(() => {
-      const itemElement = itemRefs.current[itemKey]
-      if (itemElement && navRef.current) {
-        const navRect = navRef.current.getBoundingClientRect()
-        const itemRect = itemElement.getBoundingClientRect()
-        
-        // Calculate position relative to the navigation container
+  const updateBubblePositionImmediate = (itemKey: string) => {
+    const itemElement = itemRefs.current[itemKey]
+    const navElement = navRef.current
+    
+    if (itemElement && navElement) {
+      const navRect = navElement.getBoundingClientRect()
+      const itemRect = itemElement.getBoundingClientRect()
+      
+      if (navRect.width > 0 && itemRect.width > 0) {
         const left = itemRect.left - navRect.left
         const width = itemRect.width
         
-        // Ensure we have valid values and add small buffer for consistency
         if (left >= 0 && width > 0) {
           setBubblePosition({
-            left: Math.round(left - 2), // Small buffer for visual consistency
-            width: Math.round(width + 4) // Small buffer for visual consistency
+            left: Math.round(left - 2),
+            width: Math.round(width + 4)
           })
         }
       }
-    })
+    }
+  }
+
+  const updateBubblePositionDelayed = (itemKey: string) => {
+    const attemptUpdate = () => {
+      const itemElement = itemRefs.current[itemKey]
+      const navElement = navRef.current
+      
+      if (itemElement && navElement) {
+        const navRect = navElement.getBoundingClientRect()
+        const itemRect = itemElement.getBoundingClientRect()
+        
+        if (navRect.width > 0 && itemRect.width > 0) {
+          const left = itemRect.left - navRect.left
+          const width = itemRect.width
+          
+          if (left >= 0 && width > 0) {
+            setBubblePosition({
+              left: Math.round(left - 2),
+              width: Math.round(width + 4)
+            })
+            return true
+          }
+        }
+      }
+      return false
+    }
+
+    // Try immediately first
+    if (!attemptUpdate()) {
+      // Then try with minimal delays for initialization
+      setTimeout(() => {
+        if (!attemptUpdate()) {
+          setTimeout(attemptUpdate, 100)
+        }
+      }, 50)
+    }
   }
 
   const navItems = [
@@ -53,35 +94,47 @@ export default function Header() {
   ]
 
   // Determine which item should show the bubble (current page or clicked item)
-  const activeItem = clickedItem || navItems.find(item => item.href === pathname)?.key || null
+  // Disable animations on home page to prevent conflicts
+  const isHomePage = pathname === '/'
+  const activeItem = isHomePage ? null : (clickedItem || navItems.find(item => item.href === pathname)?.key || null)
 
-  // Update bubble position when page changes or on initial load
+  // Initialize bubble position on mount and handle pathname changes
   useEffect(() => {
-    if (activeItem && !clickedItem) {
-      // Multiple attempts to ensure refs are available
-      const attemptUpdate = (attempts = 0) => {
-        if (attempts > 10) return // Max 10 attempts
-        
-        const itemElement = itemRefs.current[activeItem]
-        if (itemElement && navRef.current) {
-          updateBubblePosition(activeItem)
-        } else {
-          setTimeout(() => attemptUpdate(attempts + 1), 50)
-        }
-      }
-      
-      attemptUpdate()
+    // Reset clicked item when navigating to a new page
+    setClickedItem(null)
+    
+    if (activeItem && !isHomePage) {
+      // Use delayed timing only for page loads
+      updateBubblePositionDelayed(activeItem)
+      lastActiveItem.current = activeItem
     }
-  }, [pathname, activeItem, clickedItem])
+    
+    // Mark as initialized after first render
+    if (!isInitialized) {
+      setTimeout(() => setIsInitialized(true), 100)
+    }
+  }, [pathname, activeItem, isHomePage, isInitialized])
+
+  // Additional effect to handle window resize and ensure bubble stays aligned
+  useEffect(() => {
+    const handleResize = () => {
+      if (activeItem && !isHomePage) {
+        updateBubblePositionDelayed(activeItem)
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [activeItem, isHomePage])
 
   return (
-    <header className="fixed top-4 left-4 right-4 z-50 mdb-glass text-mdb-blue shadow-2xl backdrop-blur-xl backdrop-saturate-150 border-b border-white/10 rounded-2xl">
+    <header className="fixed top-4 left-4 right-4 z-50 bg-white/20 backdrop-blur-md text-mdb-blue shadow-lg border border-white/20 rounded-2xl">
       <nav className="font-raleway-semibold container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link href="/" className="hover:opacity-80 transition-opacity">
             <Image
-              src="/logos/mdb_3.svg"
+              src="/logos/mdb_4.svg"
               alt="MDB Website"
               width={120}
               height={40}
@@ -97,7 +150,9 @@ export default function Header() {
             {/* Sliding Bubble Background */}
             {activeItem && bubblePosition.width > 0 && (
               <div 
-                className={`absolute top-0 h-full rounded-xl transition-all duration-300 ease-out ${
+                className={`absolute top-0 h-full rounded-xl ${
+                  isHomePage ? '' : 'transition-all duration-300 ease-out'
+                } ${
                   activeItem === 'apply' ? 'bg-mdb-gold' : 'bg-mdb-blue'
                 }`}
                 style={{
@@ -114,6 +169,11 @@ export default function Header() {
                   href={item.href}
                   ref={(el) => {
                     itemRefs.current[item.key] = el
+                    // Only update on ref set if it's the active item, we're initialized, and it's a new active item
+                    if (el && activeItem === item.key && !isHomePage && isInitialized && lastActiveItem.current !== item.key) {
+                      updateBubblePositionDelayed(item.key)
+                      lastActiveItem.current = item.key
+                    }
                   }}
                   onClick={() => handleClick(item.key)}
                   className={`block px-4 py-2 rounded-xl transition-all duration-300 transform hover:scale-105 hover:drop-shadow-lg origin-center relative text-center min-w-[80px] ${
