@@ -86,13 +86,14 @@ export default function ProjectClients() {
       }
     )
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current)
+    const currentRef = sectionRef.current
+    if (currentRef) {
+      observer.observe(currentRef)
     }
 
     return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current)
+      if (currentRef) {
+        observer.unobserve(currentRef)
       }
     }
   }, [])
@@ -124,19 +125,26 @@ export default function ProjectClients() {
         </div>
 
         {/* Call to Action */}
-        <div className="text-center mt-16">
-          <h3 className="text-3xl font-bold text-blue-900 mb-6">
-            Need an Innovative App or Web Solution?
-          </h3>
-          <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
-            Let Berkeley's Brightest Build It for You.
-          </p>
-          <Link 
-            href="/contact"
-            className="inline-flex items-center bg-orange-500 text-white px-8 py-3 rounded-lg font-semibold text-lg hover:bg-orange-600 transition-colors shadow-lg"
-          >
-            Schedule a Meeting Now →
-          </Link>
+        <div className={`text-center mt-16 transition-all duration-1000 ease-out delay-500 ${
+          isVisible 
+            ? 'opacity-100 translate-y-0' 
+            : 'opacity-0 translate-y-8'
+        }`}>
+          <div className="mdb-glass-lg p-8 mb-8">
+            <h3 className="text-2xl md:text-3xl font-raleway-bold text-mdb-blue mb-6">
+              Need an Innovative App or Web Solution?
+            </h3>
+            <p className="text-lg md:text-xl text-gray-700 mb-8 max-w-2xl mx-auto leading-relaxed">
+              Let Berkeley&apos;s Brightest Build It for You.
+            </p>
+            <Link 
+              href="/contact"
+              className="inline-block bg-mdb-blue text-white px-8 md:px-12 py-4 md:py-5 rounded-xl font-raleway-semibold text-lg md:text-xl hover:bg-mdb-gold hover:text-mdb-blue hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-lg origin-center shadow-xl"
+            >
+              Schedule a Meeting Now
+              <span className="ml-2 text-xl">→</span>
+            </Link>
+          </div>
         </div>
       </div>
     </section>

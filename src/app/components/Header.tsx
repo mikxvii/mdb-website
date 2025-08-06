@@ -19,12 +19,11 @@ export default function Header() {
   }
 
   const handleClick = (itemKey: string) => {
-    // Don't trigger bubble animations on home page
-    if (isHomePage) return
-    
     setClickedItem(itemKey)
-    // Immediate update for smooth click transitions
-    updateBubblePositionImmediate(itemKey)
+    // Force immediate update for smooth click transitions
+    setTimeout(() => {
+      updateBubblePositionImmediate(itemKey)
+    }, 0)
   }
 
   const updateBubblePositionImmediate = (itemKey: string) => {
@@ -44,9 +43,11 @@ export default function Header() {
             left: Math.round(left - 2),
             width: Math.round(width + 4)
           })
+          return true
         }
       }
     }
+    return false
   }
 
   const updateBubblePositionDelayed = (itemKey: string) => {
@@ -76,12 +77,20 @@ export default function Header() {
 
     // Try immediately first
     if (!attemptUpdate()) {
-      // Then try with minimal delays for initialization
+      // Then try with multiple attempts for better reliability
       setTimeout(() => {
         if (!attemptUpdate()) {
-          setTimeout(attemptUpdate, 100)
+          setTimeout(() => {
+            if (!attemptUpdate()) {
+              setTimeout(() => {
+                if (!attemptUpdate()) {
+                  setTimeout(attemptUpdate, 100)
+                }
+              }, 50)
+            }
+          }, 50)
         }
-      }, 50)
+      }, 10)
     }
   }
 
@@ -94,17 +103,15 @@ export default function Header() {
   ]
 
   // Determine which item should show the bubble (current page or clicked item)
-  // Disable animations on home page to prevent conflicts
-  const isHomePage = pathname === '/'
-  const activeItem = isHomePage ? null : (clickedItem || navItems.find(item => item.href === pathname)?.key || null)
+  const activeItem = clickedItem || navItems.find(item => item.href === pathname)?.key || null
 
   // Initialize bubble position on mount and handle pathname changes
   useEffect(() => {
     // Reset clicked item when navigating to a new page
     setClickedItem(null)
     
-    if (activeItem && !isHomePage) {
-      // Use delayed timing only for page loads
+    if (activeItem) {
+      // For page loads, use delayed timing with multiple attempts
       updateBubblePositionDelayed(activeItem)
       lastActiveItem.current = activeItem
     }
@@ -113,19 +120,19 @@ export default function Header() {
     if (!isInitialized) {
       setTimeout(() => setIsInitialized(true), 100)
     }
-  }, [pathname, activeItem, isHomePage, isInitialized])
+  }, [pathname, activeItem, isInitialized])
 
   // Additional effect to handle window resize and ensure bubble stays aligned
   useEffect(() => {
     const handleResize = () => {
-      if (activeItem && !isHomePage) {
+      if (activeItem) {
         updateBubblePositionDelayed(activeItem)
       }
     }
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [activeItem, isHomePage])
+  }, [activeItem])
 
   return (
     <header className="fixed top-4 left-4 right-4 z-50 bg-white/20 backdrop-blur-md text-mdb-blue shadow-lg border border-white/20 rounded-2xl">
@@ -148,16 +155,14 @@ export default function Header() {
             className="hidden md:flex space-x-6 relative"
           >
             {/* Sliding Bubble Background */}
-            {activeItem && bubblePosition.width > 0 && (
+            {activeItem && (
               <div 
-                className={`absolute top-0 h-full rounded-xl ${
-                  isHomePage ? '' : 'transition-all duration-300 ease-out'
-                } ${
+                className={`absolute top-0 h-full rounded-xl transition-all duration-300 ease-out ${
                   activeItem === 'apply' ? 'bg-mdb-gold' : 'bg-mdb-blue'
                 }`}
                 style={{
-                  left: `${bubblePosition.left}px`,
-                  width: `${bubblePosition.width}px`,
+                  left: bubblePosition.width > 0 ? `${bubblePosition.left}px` : '0px',
+                  width: bubblePosition.width > 0 ? `${bubblePosition.width}px` : '100px',
                   zIndex: -1
                 }}
               />
@@ -170,7 +175,7 @@ export default function Header() {
                   ref={(el) => {
                     itemRefs.current[item.key] = el
                     // Only update on ref set if it's the active item, we're initialized, and it's a new active item
-                    if (el && activeItem === item.key && !isHomePage && isInitialized && lastActiveItem.current !== item.key) {
+                    if (el && activeItem === item.key && isInitialized && lastActiveItem.current !== item.key) {
                       updateBubblePositionDelayed(item.key)
                       lastActiveItem.current = item.key
                     }
@@ -258,7 +263,7 @@ export default function Header() {
             <li>
               <Link 
                 href="/apply" 
-                className="block px-4 py-2 bg-mdb-blue text-white rounded-xl hover:bg-mdb-blue/80 hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-lg origin-center text-center"
+                className="block px-4 py-2 bg-mdb-blue text-white rounded-xl hover:bg-mdb-blue/80 hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-lg origin-center text-center mx-auto max-w-[120px]"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Apply

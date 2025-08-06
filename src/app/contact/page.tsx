@@ -48,7 +48,7 @@ export default function Contact() {
               Contact Us
             </h1>
             <p className="text-[clamp(1rem,2.5vw,1.25rem)] text-gray-700 leading-relaxed">
-              Have questions about MDB? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+              Have questions about MDB? We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
             </p>
           </div>
 
@@ -97,7 +97,7 @@ export default function Contact() {
                 value={formData.subject}
                 onChange={handleChange}
                 className="w-full px-4 py-3 bg-white/20 backdrop-blur-md border border-white/40 rounded-lg focus:outline-none focus:ring-2 focus:ring-mdb-blue focus:border-mdb-blue focus:bg-white/30 transition-all duration-300 placeholder-gray-600"
-                placeholder="What's this about?"
+                placeholder="What&apos;s this about?"
                 required
               />
             </div>

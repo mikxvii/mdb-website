@@ -1,7 +1,7 @@
 'use client'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 
 export default function TitleSection() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -10,7 +10,7 @@ export default function TitleSection() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [typeSpeed, setTypeSpeed] = useState(100)
 
-  const words = ['MDB.', 'a Community.', 'Chillers.', 'a Network.', 'Tight-knit.', 'Diverse.', 'Creators.', 'MDBesties.', 'Developers.', 'Brainrotted.', 'Family.']
+  const words = useMemo(() => ['MDB.', 'a Community.', 'Chillers.', 'a Network.', 'Tight-knit.', 'Diverse.', 'Creators.', 'MDBesties.', 'Developers.', 'Brainrotted.', 'Family.'], [])
 
   useEffect(() => {
     // Trigger animation on next frame to prevent flash
@@ -81,11 +81,15 @@ export default function TitleSection() {
               : 'translate-y-8'
           }`}>
             <h1 className="text-[clamp(1.5rem,4.5vw,2.75rem)] md:text-[clamp(1.75rem,5.5vw,3.5rem)] lg:text-[clamp(2rem,6.5vw,4.5rem)] mb-6 text-mdb-blue font-raleway-bold leading-tight">
-              We are{' '}
-              <span className="inline-block">
-                {currentText}
-                <span className="animate-pulse text-mdb-blue">|</span>
-              </span>
+              <div className="block">
+                We are
+              </div>
+              <div className="block min-h-[1.2em]">
+                <span className="inline-block">
+                  {currentText}
+                  <span className="animate-pulse text-mdb-blue">|</span>
+                </span>
+              </div>
             </h1>
             <p className="text-[clamp(0.85rem,2.2vw,1.05rem)] md:text-[clamp(0.875rem,2.5vw,1.125rem)] lg:text-[clamp(1rem,3vw,1.25rem)] mb-8 text-gray-700 leading-relaxed max-w-lg mx-auto lg:mx-0">
             MDB is a community of passionate and innovative mobile developers at UC Berkeley!

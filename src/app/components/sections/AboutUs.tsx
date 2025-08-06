@@ -35,12 +35,12 @@ export default function AboutUs() {
             <p className="text-lg text-gray-700 leading-relaxed mb-8">
               Mobile Developers of Berkeley is a dynamic tech club at UC Berkeley, founded in 2015, 
               dedicated to mobile/full-stack development and fostering a vibrant community. We bring together 
-              passionate developers, designers, and innovators to create impactful projects for startupsand learn 
+              passionate developers, designers, and innovators to create impactful projects for startups and learn 
               from each other through club hackshops, training programs, and collaborative events.
             </p>
             <p className="text-lg text-gray-700 leading-relaxed">
               Our mission is to provide hands-on experience in mobile and web development while building 
-              lasting friendships and professional connections. Whether you're a seasoned developer or 
+              lasting friendships and professional connections. Whether you&apos;re a seasoned developer or 
               just starting your coding journey, MDB offers a supportive environment to grow your skills 
               and make meaningful contributions to real-world projects.
             </p>

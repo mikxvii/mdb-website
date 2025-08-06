@@ -1,5 +1,5 @@
 'use client'
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, useMemo } from 'react'
 import Image from 'next/image'
 
 export default function Carousel() {
@@ -11,13 +11,13 @@ export default function Carousel() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [typeSpeed, setTypeSpeed] = useState(100)
 
-  const words = ['Beasts.', 'Bots.', 'Baddies.', 'Ballers.', 'Boomers.', 'Bruzz.', 'B.']
+  const words = useMemo(() => ['Beasts.', 'Bots.', 'Baddies.', 'Ballers.', 'Boomers.', 'Bruzz.', 'B.'], [])
   
   // First carousel media and captions (top strip) - mixed images and videos
   const media1 = [
     { type: 'image', src: "/images/lafayette5.jpg" },
     { type: 'image', src: "/images/edan-goat.jpeg" },
-    { type: 'video', src: "/videos/mdb-video.mp4" },
+    { type: 'video', src: "/videos/mdb-video.MP4" },
     { type: 'image', src: "/images/table1.jpeg" },
     { type: 'image', src: "/images/mdb-ride.jpg" },
     { type: 'image', src: "/images/car2.jpeg" },
@@ -45,7 +45,7 @@ export default function Carousel() {
   // Second carousel media and captions (middle strip) - mixed images and videos
   const media2 = [
     { type: 'image', src: "/images/mdb-goats.jpeg" },
-    { type: 'video', src: "/videos/mdb-goal.mp4" },
+    { type: 'video', src: "/videos/mdb-goal.MP4" },
     { type: 'image', src: "/images/8ball.jpeg" },
     { type: 'image', src: "/images/wbn1.jpeg" },
     { type: 'image', src: "/images/circuit7.jpg" },
@@ -201,9 +201,9 @@ export default function Carousel() {
   }, [currentText, isDeleting, currentWordIndex, typeSpeed, words])
 
   return (
-    <section className="w-screen bg-gradient-to-b from-mdb-light-blue to-white py-16 relative left-1/2 -translate-x-1/2 overflow-hidden">
+    <section className="w-screen bg-gradient-to-b from-mdb-light-blue to-white py-8 sm:py-12 md:py-16 relative left-1/2 -translate-x-1/2 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-mdb-light-blue to-white z-0"></div>
-      <div className="mb-16 relative z-10">
+      <div className="mb-8 sm:mb-12 md:mb-16 relative z-10">
         <h2 className="text-5xl font-raleway-bold text-center text-mdb-blue">
           MD{currentText}
           <span className="animate-pulse text-mdb-blue">|</span>
@@ -212,7 +212,7 @@ export default function Carousel() {
       
       {/* Full-width continuous sliding strip with alternating heights */}
       <div className="w-screen relative left-1/2 -translate-x-1/2 z-10">
-        <div className="overflow-hidden h-[1200px]">
+        <div className="overflow-hidden h-[800px] sm:h-[900px] md:h-[1000px] lg:h-[1200px]">
           {/* First carousel strip - moves right to left */}
           <div 
             ref={carouselRef}
@@ -225,17 +225,38 @@ export default function Carousel() {
             {duplicatedMedia1.map((mediaItem: any, index: number) => (
               <div 
                 key={index} 
-                className="group flex-shrink-0 w-[400px] relative mx-4 hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-xl origin-center mt-6"
+                className="group flex-shrink-0 w-[280px] sm:w-[320px] md:w-[360px] lg:w-[400px] relative mx-2 sm:mx-3 md:mx-4 hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-xl origin-center mt-6"
               >
                 {/* Media container */}
-                <div className="relative w-full h-[300px]">
+                <div className="relative w-full h-[200px] sm:h-[220px] md:h-[250px] lg:h-[300px]">
                   {mediaItem.type === 'video' ? (
                     <video
                       src={mediaItem.src}
                       autoPlay
                       muted
                       loop
+                      playsInline
+                      preload="metadata"
                       className="w-full h-full object-cover rounded-2xl"
+                      onError={(e) => {
+                        console.error('Video failed to load:', mediaItem.src, e)
+                        // Fallback to showing a placeholder or error message
+                        const videoElement = e.target as HTMLVideoElement
+                        videoElement.style.display = 'none'
+                        const parent = videoElement.parentElement
+                        if (parent) {
+                          const fallback = document.createElement('div')
+                          fallback.className = 'w-full h-full bg-gray-200 rounded-2xl flex items-center justify-center'
+                          fallback.innerHTML = '<span class="text-gray-500">Video unavailable</span>'
+                          parent.appendChild(fallback)
+                        }
+                      }}
+                      onLoadStart={() => {
+                        console.log('Video loading started:', mediaItem.src)
+                      }}
+                      onCanPlay={() => {
+                        console.log('Video can play:', mediaItem.src)
+                      }}
                     />
                   ) : (
                     <Image
@@ -249,7 +270,7 @@ export default function Carousel() {
                   )}
                 </div>
                 {/* Caption card - slides out from underneath */}
-                <div className="absolute top-[271px] left-0 right-0 bg-mdb-blue text-white text-sm px-4 py-3 rounded-b-2xl shadow-lg transform -translate-y-4 opacity-0 group-hover:translate-y-4 group-hover:opacity-100 transition-all duration-300 ease-out z-10 text-center">
+                <div className="absolute top-[171px] sm:top-[191px] md:top-[221px] lg:top-[271px] left-0 right-0 bg-mdb-blue text-white text-sm px-4 py-3 rounded-b-2xl shadow-lg transform -translate-y-4 opacity-0 group-hover:translate-y-4 group-hover:opacity-100 transition-all duration-300 ease-out z-10 text-center">
                   {duplicatedCaptions1[index]}
                 </div>
               </div>
@@ -259,7 +280,7 @@ export default function Carousel() {
           {/* Second carousel strip - moves left to right */}
           <div 
             ref={carouselRef2}
-            className="flex items-start mt-8"
+            className="flex items-start mt-4 sm:mt-6 md:mt-8"
             style={{ 
               width: 'fit-content',
               willChange: 'transform' // Optimize for animations
@@ -268,17 +289,38 @@ export default function Carousel() {
             {duplicatedMedia2.map((mediaItem: any, index: number) => (
               <div 
                 key={`second-${index}`} 
-                className="group flex-shrink-0 w-[400px] relative mx-4 hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-xl origin-center mt-6"
+                className="group flex-shrink-0 w-[280px] sm:w-[320px] md:w-[360px] lg:w-[400px] relative mx-2 sm:mx-3 md:mx-4 hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-xl origin-center mt-6"
               >
                 {/* Media container */}
-                <div className="relative w-full h-[300px]">
+                <div className="relative w-full h-[200px] sm:h-[220px] md:h-[250px] lg:h-[300px]">
                   {mediaItem.type === 'video' ? (
                     <video
                       src={mediaItem.src}
                       autoPlay
                       muted
                       loop
+                      playsInline
+                      preload="metadata"
                       className="w-full h-full object-cover rounded-2xl"
+                      onError={(e) => {
+                        console.error('Video failed to load:', mediaItem.src, e)
+                        // Fallback to showing a placeholder or error message
+                        const videoElement = e.target as HTMLVideoElement
+                        videoElement.style.display = 'none'
+                        const parent = videoElement.parentElement
+                        if (parent) {
+                          const fallback = document.createElement('div')
+                          fallback.className = 'w-full h-full bg-gray-200 rounded-2xl flex items-center justify-center'
+                          fallback.innerHTML = '<span class="text-gray-500">Video unavailable</span>'
+                          parent.appendChild(fallback)
+                        }
+                      }}
+                      onLoadStart={() => {
+                        console.log('Video loading started:', mediaItem.src)
+                      }}
+                      onCanPlay={() => {
+                        console.log('Video can play:', mediaItem.src)
+                      }}
                     />
                   ) : (
                     <Image
@@ -292,7 +334,7 @@ export default function Carousel() {
                   )}
                 </div>
                 {/* Caption card - slides out from underneath */}
-                <div className="absolute top-[271px] left-0 right-0 bg-mdb-blue text-white text-sm px-4 py-3 rounded-b-2xl shadow-lg transform -translate-y-4 opacity-0 group-hover:translate-y-4 group-hover:opacity-100 transition-all duration-300 ease-out z-10 text-center">
+                <div className="absolute top-[171px] sm:top-[191px] md:top-[221px] lg:top-[271px] left-0 right-0 bg-mdb-blue text-white text-sm px-4 py-3 rounded-b-2xl shadow-lg transform -translate-y-4 opacity-0 group-hover:translate-y-4 group-hover:opacity-100 transition-all duration-300 ease-out z-10 text-center">
                   {duplicatedCaptions2[index]}
                 </div>
               </div>
@@ -302,7 +344,7 @@ export default function Carousel() {
           {/* Third carousel strip - moves right to left */}
           <div 
             ref={carouselRef3}
-            className="flex items-start mt-8"
+            className="flex items-start mt-4 sm:mt-6 md:mt-8"
             style={{ 
               width: 'fit-content',
               willChange: 'transform' // Optimize for animations
@@ -311,17 +353,38 @@ export default function Carousel() {
             {duplicatedMedia3.map((mediaItem: any, index: number) => (
               <div 
                 key={`third-${index}`} 
-                className="group flex-shrink-0 w-[400px] relative mx-4 hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-xl origin-center mt-6"
+                className="group flex-shrink-0 w-[280px] sm:w-[320px] md:w-[360px] lg:w-[400px] relative mx-2 sm:mx-3 md:mx-4 hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-xl origin-center mt-6"
               >
                 {/* Media container */}
-                <div className="relative w-full h-[300px]">
+                <div className="relative w-full h-[200px] sm:h-[220px] md:h-[250px] lg:h-[300px]">
                   {mediaItem.type === 'video' ? (
                     <video
                       src={mediaItem.src}
                       autoPlay
                       muted
                       loop
+                      playsInline
+                      preload="metadata"
                       className="w-full h-full object-cover rounded-2xl"
+                      onError={(e) => {
+                        console.error('Video failed to load:', mediaItem.src, e)
+                        // Fallback to showing a placeholder or error message
+                        const videoElement = e.target as HTMLVideoElement
+                        videoElement.style.display = 'none'
+                        const parent = videoElement.parentElement
+                        if (parent) {
+                          const fallback = document.createElement('div')
+                          fallback.className = 'w-full h-full bg-gray-200 rounded-2xl flex items-center justify-center'
+                          fallback.innerHTML = '<span class="text-gray-500">Video unavailable</span>'
+                          parent.appendChild(fallback)
+                        }
+                      }}
+                      onLoadStart={() => {
+                        console.log('Video loading started:', mediaItem.src)
+                      }}
+                      onCanPlay={() => {
+                        console.log('Video can play:', mediaItem.src)
+                      }}
                     />
                   ) : (
                     <Image
@@ -335,7 +398,7 @@ export default function Carousel() {
                   )}
                 </div>
                 {/* Caption card - slides out from underneath */}
-                <div className="absolute top-[271px] left-0 right-0 bg-mdb-blue text-white text-sm px-4 py-3 rounded-b-2xl shadow-lg transform -translate-y-4 opacity-0 group-hover:translate-y-4 group-hover:opacity-100 transition-all duration-300 ease-out z-10 text-center">
+                <div className="absolute top-[171px] sm:top-[191px] md:top-[221px] lg:top-[271px] left-0 right-0 bg-mdb-blue text-white text-sm px-4 py-3 rounded-b-2xl shadow-lg transform -translate-y-4 opacity-0 group-hover:translate-y-4 group-hover:opacity-100 transition-all duration-300 ease-out z-10 text-center">
                   {duplicatedCaptions3[index]}
                 </div>
               </div>

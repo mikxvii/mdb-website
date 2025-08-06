@@ -11,7 +11,7 @@ export default function Calendly() {
           </h2>
           <p className="text-[clamp(1rem,2.5vw,1.125rem)] text-gray-700 max-w-3xl mx-auto leading-relaxed">
             Schedule a coffee chat with our team to learn more about MDB and ask any questions 
-            about the application process. We'd love to get to know you!
+            about the application process. We&apos;d love to get to know you!
           </p>
         </div>
 

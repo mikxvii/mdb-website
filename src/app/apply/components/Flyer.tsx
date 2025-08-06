@@ -30,7 +30,7 @@ export default function Flyer() {
               Join MDB
             </h1>
             <p className="text-[clamp(1rem,2.5vw,1.25rem)] text-gray-700 max-w-4xl mx-auto leading-relaxed">
-              Become part of UC Berkeley's premier mobile development community. 
+              Become part of UC Berkeley&apos;s premier mobile development community. 
               Learn, build, and grow with passionate developers who share your vision.
             </p>
           </div>
@@ -41,15 +41,16 @@ export default function Flyer() {
               ? 'translate-y-0' 
               : 'translate-y-8'
           }`}>
-            <div className="relative w-full h-[450px] md:h-[550px] lg:h-[650px] rounded-2xl overflow-hidden shadow-2xl">
+            <div className="relative w-full rounded-2xl overflow-hidden shadow-2xl bg-gray-100">
               <Image
                 src="/images/recruit-fall-25.png"
                 alt="MDB Mobile Development Community"
-                fill
-                className="object-cover"
+                width={800}
+                height={1200}
+                className="w-full h-auto object-contain"
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
             </div>
           </div>
 
@@ -79,7 +80,7 @@ export default function Flyer() {
 
             <div className="mdb-glass mdb-glass-hover p-6 md:col-span-2 lg:col-span-1">
               <div className="text-3xl mb-4">💡</div>
-              <h3 className="text-xl font-raleway-semibold text-mdb-blue mb-3">What You'll Learn</h3>
+                              <h3 className="text-xl font-raleway-semibold text-mdb-blue mb-3">What You&apos;ll Learn</h3>
               <p className="text-gray-700 leading-relaxed">
                 iOS/Android development, UI/UX design, backend integration, project management, and the 
                 latest mobile development frameworks and tools.
@@ -98,7 +99,7 @@ export default function Flyer() {
             </h2>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <h3 className="text-lg font-raleway-semibold text-mdb-blue mb-4">What We're Looking For</h3>
+                <h3 className="text-lg font-raleway-semibold text-mdb-blue mb-4">What We&apos;re Looking For</h3>
                 <ul className="space-y-3 text-gray-700">
                   <li className="flex items-start gap-3">
                     <span className="text-mdb-blue font-bold">•</span>
@@ -123,7 +124,7 @@ export default function Flyer() {
                 </ul>
               </div>
               <div>
-                <h3 className="text-lg font-raleway-semibold text-mdb-blue mb-4">What You'll Get</h3>
+                <h3 className="text-lg font-raleway-semibold text-mdb-blue mb-4">What You&apos;ll Get</h3>
                 <ul className="space-y-3 text-gray-700 mb-6">
                   <li className="flex items-start gap-3">
                     <span className="text-mdb-blue font-bold">•</span>

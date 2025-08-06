@@ -68,7 +68,7 @@ export default function Clients({ client, className = '' }: ClientsProps) {
         
         <div className="text-center p-3 bg-gray-50 rounded-lg">
           <div className="text-2xl mb-2">👥</div>
-          <p className="text-sm font-semibold text-gray-700">PM'S</p>
+          <p className="text-sm font-semibold text-gray-700">PM&apos;S</p>
           <p className="text-xs text-gray-600">{client.pms.join(' & ')}</p>
         </div>
       </div>

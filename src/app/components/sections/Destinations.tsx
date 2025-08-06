@@ -60,7 +60,7 @@ export default function Destinations() {
             moving on to positions in leading companies and innovative startups.
           </p>
           <p className="text-xl text-gray-700">
-            Here's a glimpse of the companies where our members make an impact.
+            Here&apos;s a glimpse of the companies where our members make an impact.
           </p>
         </div>
 
