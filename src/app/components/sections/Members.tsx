@@ -9,94 +9,9 @@ interface Member {
 // Sample members data - you can replace with actual member data
 const members: Member[] = [
   {
-    name: "Noah Yin",
-    title: "President",
-    image: "/images/noah-goat.jpeg"
-  },
-  {
-    name: "Jeffrey Yum",
-    title: "VP of Internal Affairs",
-    image: "/images/jefflineage5.jpg"
-  },
-  {
-    name: "Hailee Yun",
-    title: "VP of Marketing",
-    image: "/images/mdb5 2.jpg"
-  },
-  {
-    name: "Kevin Lin",
-    title: "VP of Internal Affairs",
-    image: "/images/car2.jpeg"
-  },
-  {
-    name: "Bonnie Wang",
-    title: "VP of Operations",
-    image: "/images/mdb-ride.jpg"
-  },
-  {
-    name: "Aldrin Ong",
-    title: "VP of Projects",
-    image: "/images/table1.jpeg"
-  },
-  {
-    name: "Amol Budhiraja",
-    title: "VP of Education",
-    image: "/images/mdb-goats.jpeg"
-  },
-  {
-    name: "Edan Goat",
-    title: "Project Manager",
-    image: "/images/edan-goat.jpeg"
-  },
-  {
-    name: "Sarah Chen",
+    name: "Sample Member",
     title: "Developer",
-    image: "/images/mdb-hawaii.jpg"
-  },
-  {
-    name: "Mike Johnson",
-    title: "Designer",
-    image: "/images/car3.jpeg"
-  },
-  {
-    name: "Emma Davis",
-    title: "Developer",
-    image: "/images/table2.jpeg"
-  },
-  {
-    name: "Alex Kim",
-    title: "Project Manager",
-    image: "/images/table3.jpeg"
-  },
-  {
-    name: "Rachel Lee",
-    title: "Developer",
-    image: "/images/mdb-newnite.jpg"
-  },
-  {
-    name: "David Park",
-    title: "Designer",
-    image: "/images/circuit7.jpg"
-  },
-  {
-    name: "Lisa Wang",
-    title: "Developer",
-    image: "/images/sur7.jpg"
-  },
-  {
-    name: "Tom Chen",
-    title: "Project Manager",
-    image: "/images/tp-over.jpg"
-  },
-  {
-    name: "Anna Rodriguez",
-    title: "Developer",
-    image: "/images/soccer-w.jpg"
-  },
-  {
-    name: "Chris Thompson",
-    title: "Designer",
-    image: "/images/wbn1.jpeg"
+    image: "/logos/mdb_4.svg"
   }
 ]
 
@@ -115,7 +30,7 @@ export default function Members() {
               name={member.name}
               title={member.title}
               image={member.image}
-              size="small"
+              size="large"
             />
           ))}
         </div>

@@ -8,39 +8,14 @@ interface ExecMember {
 
 const execMembers: ExecMember[] = [
   {
-    name: "Noah Yin",
-    title: "President",
-    image: "/images/noah-goat.jpeg"
-  },
-  {
-    name: "Jeffrey Yum",
-    title: "VP of Internal Affairs",
-    image: "/images/jefflineage5.jpg"
-  },
-  {
-    name: "Hailee Yun",
-    title: "VP of Marketing",
-    image: "/images/mdb5 2.jpg"
-  },
-  {
-    name: "Kevin Lin",
-    title: "VP of Internal Affairs",
-    image: "/images/car2.jpeg"
-  },
-  {
-    name: "Bonnie Wang",
-    title: "VP of Operations",
-    image: "/images/mdb-ride.jpg"
-  },
-  {
-    name: "Aldrin Ong",
+    name: "Sodbayar Ganbat",
     title: "VP of Projects",
-    image: "/images/table1.jpeg"
+    image: "/exec/sod.jpeg"
   },
   {
-    name: "Amol Budhiraja",
-    title: "VP of Education",
-    image: "/images/mdb-goats.jpeg"
+    name: "Mike Guerrero",
+    title: "VP of Marketing",
+    image: "/exec/mike.jpeg"
   }
 ]
 

@@ -8,34 +8,9 @@ interface ProjectManager {
 
 const projectManagers: ProjectManager[] = [
   {
-    name: "Edan Goat",
+    name: "Sample Project Manager",
     title: "Project Manager",
-    image: "/images/edan-goat.jpeg"
-  },
-  {
-    name: "Sarah Chen",
-    title: "Project Manager",
-    image: "/images/mdb-hawaii.jpg"
-  },
-  {
-    name: "Alex Kim",
-    title: "Project Manager",
-    image: "/images/table3.jpeg"
-  },
-  {
-    name: "Tom Chen",
-    title: "Project Manager",
-    image: "/images/tp-over.jpg"
-  },
-  {
-    name: "Rachel Lee",
-    title: "Project Manager",
-    image: "/images/mdb-newnite.jpg"
-  },
-  {
-    name: "Emma Davis",
-    title: "Project Manager",
-    image: "/images/table2.jpeg"
+    image: "/logos/mdb_4.svg"
   }
 ]
 
@@ -54,7 +29,7 @@ export default function ProjectManagers() {
               name={member.name}
               title={member.title}
               image={member.image}
-              size="medium"
+              size="large"
             />
           ))}
         </div>
