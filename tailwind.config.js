@@ -10,12 +10,13 @@ module.exports = {
       fontFamily: {
         'raleway': ['Raleway', 'sans-serif'],
         'raleway-semibold': ['Raleway', 'sans-serif'],
+        'inter': ['Inter', 'sans-serif'],
+        'sans': ['Inter', 'sans-serif'], // Make Inter the default sans-serif
       },
       fontSize: {
         // Responsive font sizes
         'xs-responsive': ['clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem)', { lineHeight: '1.5' }],
         'sm-responsive': ['clamp(0.875rem, 0.8rem + 0.375vw, 1rem)', { lineHeight: '1.5' }],
-        'base-responsive': ['clamp(1rem, 0.9rem + 0.5vw, 1.125rem)', { lineHeight: '1.6' }],
         'lg-responsive': ['clamp(1.125rem, 1rem + 0.625vw, 1.25rem)', { lineHeight: '1.6' }],
         'xl-responsive': ['clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem)', { lineHeight: '1.5' }],
         '2xl-responsive': ['clamp(1.5rem, 1.3rem + 1vw, 2rem)', { lineHeight: '1.4' }],
@@ -31,6 +32,15 @@ module.exports = {
         'raleway-semibold': '600',
         'raleway-bold': '700',
         'raleway-extrabold': '800',
+        'inter-thin': '100',
+        'inter-extralight': '200',
+        'inter-light': '300',
+        'inter-normal': '400',
+        'inter-medium': '500',
+        'inter-semibold': '600',
+        'inter-bold': '700',
+        'inter-extrabold': '800',
+        'inter-black': '900',
       },
       colors: {
         // Brand Colors
@@ -116,9 +126,25 @@ module.exports = {
            orange: '#f97316',
            pink: '#ec4899',
            'light-blue': '#D1DFF2',
+           gold: '#FEBD10',
          }
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addUtilities }) {
+      const newUtilities = {
+        '.mdb-glass': {
+          '@apply bg-white/30 backdrop-blur-md rounded-2xl shadow-lg border border-white/40': {},
+        },
+        '.mdb-glass-hover': {
+          '@apply hover:scale-105 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-lg origin-center': {},
+        },
+        '.mdb-glass-lg': {
+          '@apply bg-white/30 backdrop-blur-md rounded-2xl shadow-xl border border-white/40': {},
+        },
+      }
+      addUtilities(newUtilities)
+    }
+  ],
 } 
