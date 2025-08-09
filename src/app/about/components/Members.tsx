@@ -1,19 +1,5 @@
-import MemberDB from './MemberDB'
-
-interface Member {
-  name: string
-  title: string
-  image: string
-}
-
-// Sample members data - you can replace with actual member data
-const members: Member[] = [
-  {
-    name: "Sample Member",
-    title: "Developer",
-    image: "/logos/mdb_4.svg"
-  }
-]
+import MemberDB from '../../components/MemberDB'
+import { members } from '../../constants/members'
 
 export default function Members() {
   return (

@@ -1,23 +1,5 @@
-import MemberDB from './MemberDB'
-
-interface ExecMember {
-  name: string
-  title: string
-  image: string
-}
-
-const execMembers: ExecMember[] = [
-  {
-    name: "Sodbayar Ganbat",
-    title: "VP of Projects",
-    image: "/exec/sod.jpeg"
-  },
-  {
-    name: "Mike Guerrero",
-    title: "VP of Marketing",
-    image: "/exec/mike.jpeg"
-  }
-]
+import MemberDB from '../../components/MemberDB'
+import { execMembers } from '../../constants/exec'
 
 export default function Exec() {
   return (

@@ -1,18 +1,5 @@
-import MemberDB from './MemberDB'
-
-interface ProjectManager {
-  name: string
-  title: string
-  image: string
-}
-
-const projectManagers: ProjectManager[] = [
-  {
-    name: "Sample Project Manager",
-    title: "Project Manager",
-    image: "/logos/mdb_4.svg"
-  }
-]
+import MemberDB from '../../components/MemberDB'
+import { projectManagers } from '../../constants/projectManagers'
 
 export default function ProjectManagers() {
   return (

@@ -187,4 +187,20 @@ a {
   .text-responsive-4xl { font-size: clamp(2.25rem, 1.8rem + 2.25vw, 3rem); line-height: 1.2; }
   .text-responsive-5xl { font-size: clamp(3rem, 2.25rem + 3.75vw, 4rem); line-height: 1.1; }
   .text-responsive-6xl { font-size: clamp(3.75rem, 2.75rem + 5vw, 5rem); line-height: 1; }
+
+  /* Mobile-friendly scrollbar hiding */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+  }
+
+  /* Touch-friendly scrolling for mobile */
+  .touch-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
 } 
