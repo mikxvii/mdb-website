@@ -14,16 +14,16 @@ export default function Carousel() {
   // First carousel media and captions (top strip) - mixed images and videos
   const media1 = [
     { type: 'image', src: "/images/lafayette5.jpg" },
-    { type: 'image', src: "/images/edan-goat.jpeg" },
+    { type: 'image', src: "/images/edan-goat.JPEG" },
     { type: 'video', src: "/videos/mdb-video.MP4" },
-    { type: 'image', src: "/images/table1.jpeg" },
+    { type: 'image', src: "/images/table1.JPEG" },
     { type: 'image', src: "/images/mdb-ride.jpg" },
-    { type: 'image', src: "/images/car2.jpeg" },
-    { type: 'image', src: "/images/stpat.jpeg" },
+    { type: 'image', src: "/images/car2.JPEG" },
+    { type: 'image', src: "/images/stpat.JPEG" },
     { type: 'image', src: "/images/wnc.jpg" },
-    { type: 'image', src: "/images/noah-goat.jpeg" },
+    { type: 'image', src: "/images/noah-goat.JPEG" },
     { type: 'image', src: "/images/jefflineage5.jpg" },
-    { type: 'image', src: "/images/newbies.jpeg" }
+    { type: 'image', src: "/images/newbies.JPEG" }
   ]
 
   const captions1 = [
@@ -42,14 +42,14 @@ export default function Carousel() {
 
   // Second carousel media and captions (middle strip) - mixed images and videos
   const media2 = [
-    { type: 'image', src: "/images/mdb-goats.jpeg" },
+    { type: 'image', src: "/images/mdb-goats.JPEG" },
     { type: 'video', src: "/videos/mdb-goal.MP4" },
-    { type: 'image', src: "/images/8ball.jpeg" },
-    { type: 'image', src: "/images/wbn1.jpeg" },
+    { type: 'image', src: "/images/8ball.JPEG" },
+    { type: 'image', src: "/images/wbn1.JPEG" },
     { type: 'image', src: "/images/circuit7.jpg" },
-    { type: 'image', src: "/images/table3.jpeg" },
-    { type: 'image', src: "/images/mdb-hawaii.jpg" },
-    { type: 'image', src: "/images/car1.jpeg" },
+    { type: 'image', src: "/images/table3.JPEG" },
+    { type: 'image', src: "/images/mdb-hawaii.JPG" },
+    { type: 'image', src: "/images/car1.JPEG" },
     { type: 'image', src: "/images/mdb5 2.jpg" },
     { type: 'image', src: "/images/pms2.jpg" },
     { type: 'image', src: "/images/6flags-selfie.jpg" }
@@ -74,13 +74,13 @@ export default function Carousel() {
     { type: 'video', src: "/videos/gitlit.mp4" },
     { type: 'image', src: "/images/soccer-w.jpg" },
     { type: 'image', src: "/images/tp-over.jpg" },
-    { type: 'image', src: "/images/wbn2.jpeg" },
+    { type: 'image', src: "/images/wbn2.JPEG" },
     { type: 'image', src: "/images/sur7.jpg" },
-    { type: 'image', src: "/images/mdb-newnite.jpg" },
+    { type: 'image', src: "/images/mdb-newnite.JPG" },
     { type: 'image', src: "/images/mdb-6flags.jpeg" },
-    { type: 'image', src: "/images/car3.jpeg" },
+    { type: 'image', src: "/images/car3.JPEG" },
     { type: 'image', src: "/images/edan-pair.jpg" },
-    { type: 'image', src: "/images/table2.jpeg" }
+    { type: 'image', src: "/images/table2.JPEG" }
   ]
 
   const captions3 = [
@@ -232,6 +232,19 @@ export default function Carousel() {
                       className="object-cover rounded-2xl"
                       sizes="400px"
                       priority={index < 6} // Prioritize first 6 images
+                      onError={(e) => {
+                        console.error('Image failed to load:', mediaItem.src, e)
+                        // Fallback to showing a placeholder
+                        const imgElement = e.target as HTMLImageElement
+                        imgElement.style.display = 'none'
+                        const parent = imgElement.parentElement
+                        if (parent) {
+                          const fallback = document.createElement('div')
+                          fallback.className = 'w-full h-full bg-gray-200 rounded-2xl flex items-center justify-center'
+                          fallback.innerHTML = '<span class="text-gray-500 text-sm">Image unavailable</span>'
+                          parent.appendChild(fallback)
+                        }
+                      }}
                     />
                   )}
                 </div>
@@ -296,6 +309,19 @@ export default function Carousel() {
                       className="object-cover rounded-2xl"
                       sizes="400px"
                       priority={false} // Don't prioritize second strip
+                      onError={(e) => {
+                        console.error('Image failed to load:', mediaItem.src, e)
+                        // Fallback to showing a placeholder
+                        const imgElement = e.target as HTMLImageElement
+                        imgElement.style.display = 'none'
+                        const parent = imgElement.parentElement
+                        if (parent) {
+                          const fallback = document.createElement('div')
+                          fallback.className = 'w-full h-full bg-gray-200 rounded-2xl flex items-center justify-center'
+                          fallback.innerHTML = '<span class="text-gray-500 text-sm">Image unavailable</span>'
+                          parent.appendChild(fallback)
+                        }
+                      }}
                     />
                   )}
                 </div>
@@ -360,6 +386,19 @@ export default function Carousel() {
                       className="object-cover rounded-2xl"
                       sizes="400px"
                       priority={false} // Don't prioritize third strip
+                      onError={(e) => {
+                        console.error('Image failed to load:', mediaItem.src, e)
+                        // Fallback to showing a placeholder
+                        const imgElement = e.target as HTMLImageElement
+                        imgElement.style.display = 'none'
+                        const parent = imgElement.parentElement
+                        if (parent) {
+                          const fallback = document.createElement('div')
+                          fallback.className = 'w-full h-full bg-gray-200 rounded-2xl flex items-center justify-center'
+                          fallback.innerHTML = '<span class="text-gray-500 text-sm">Image unavailable</span>'
+                          parent.appendChild(fallback)
+                        }
+                      }}
                     />
                   )}
                 </div>

@@ -14,8 +14,6 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
-    // Allow images from Supabase storage
-    domains: ['hpjrcgsnlokqltodthhs.supabase.co'],
     // Alternative: Use remotePatterns for more flexible configuration
     remotePatterns: [
       {
@@ -25,6 +23,11 @@ const nextConfig = {
         pathname: '/storage/v1/object/public/**',
       },
     ],
+    // Add better error handling and optimization
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Handle failed images gracefully
+    unoptimized: false,
   },
   
   // Configure video handling

@@ -16,7 +16,9 @@
     "test:all": "npm run test && npm run test:e2e",
     "analyze": "ANALYZE=true npm run build",
     "build:analyze": "ANALYZE=true next build",
-    "lighthouse": "lighthouse http://localhost:3000 --output=html --output-path=./lighthouse-report.html"
+    "lighthouse": "lighthouse http://localhost:3000 --output=html --output-path=./lighthouse-report.html",
+    "verify-images": "node scripts/verify-images.js",
+    "optimize-images": "node scripts/optimize-images.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.54.0",
