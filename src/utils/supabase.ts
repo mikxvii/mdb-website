@@ -153,25 +153,82 @@ export const getCurrentUser = () => {
 
 // Simple image upload
 export const uploadImage = async (file: File) => {
-  const supabase = await getSupabaseClient()
-  
-  const { data, error } = await supabase.storage
-    .from('images')
-    .upload(`${Date.now()}-${file.name}`, file)
-  
-  if (error) throw error
-  return data
+  try {
+    // Validate file
+    if (!file) {
+      throw new Error('No file provided')
+    }
+    
+    // Check file size (limit to 10MB for consistency with UI)
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error('File size must be less than 10MB')
+    }
+    
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      throw new Error('File must be an image')
+    }
+    
+    // Validate file name
+    if (!file.name || file.name.trim().length === 0) {
+      throw new Error('File must have a valid name')
+    }
+    
+    const supabase = await getSupabaseClient()
+    
+    // Generate unique filename
+    const timestamp = Date.now()
+    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+    const filename = `${timestamp}-${sanitizedName}`
+    
+    console.log('Uploading image:', { originalName: file.name, filename, size: file.size, type: file.type })
+    
+    const { data, error } = await supabase.storage
+      .from('images')
+      .upload(filename, file)
+    
+    if (error) {
+      console.error('Supabase upload error:', error)
+      throw error
+    }
+    
+    if (!data) {
+      throw new Error('No data returned from upload')
+    }
+    
+    console.log('Image uploaded successfully:', data.path)
+    return data
+  } catch (error) {
+    console.error('Error in uploadImage function:', error)
+    throw error
+  }
 }
 
 // Get image URL
 export const getImageUrl = async (path: string) => {
   try {
+    if (!path) {
+      console.warn('No image path provided to getImageUrl')
+      return ''
+    }
+    
     const response = await fetch(`/api/supabase-config?path=${encodeURIComponent(path)}`)
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
     const data = await response.json()
+    
+    if (!data.url) {
+      throw new Error('No URL returned from API')
+    }
+    
     return data.url
   } catch (error) {
-    console.error('Failed to get image URL:', error)
-    throw error
+    console.error('Failed to get image URL for path:', path, error)
+    // Return empty string as fallback - the UI should handle this gracefully
+    return ''
   }
 }
 
@@ -262,6 +319,41 @@ export const deleteImage = async (path: string) => {
   }
 }
 
+// Safely delete old image when updating member (with error handling)
+export const safeDeleteOldImage = async (oldImagePath: string | null) => {
+  if (!oldImagePath) {
+    return true
+  }
+  
+  try {
+    console.log('Attempting to delete old image:', oldImagePath)
+    await deleteImage(oldImagePath)
+    console.log('Successfully deleted old image:', oldImagePath)
+    return true
+  } catch (error) {
+    console.warn('Failed to delete old image, but this is not critical:', oldImagePath, error)
+    // Don't throw error - this is not critical for the update operation
+    return false
+  }
+}
+
+// Validate that an uploaded image is accessible
+export const validateImageAccess = async (path: string): Promise<boolean> => {
+  try {
+    if (!path) return false
+    
+    const url = await getImageUrl(path)
+    if (!url) return false
+    
+    // Try to fetch the image to ensure it's accessible
+    const response = await fetch(url, { method: 'HEAD' })
+    return response.ok
+  } catch (error) {
+    console.warn('Image validation failed:', path, error)
+    return false
+  }
+}
+
 // Member management functions
 export const getExecMembers = async () => {
   try {
@@ -274,12 +366,32 @@ export const getExecMembers = async () => {
     
     if (error) throw error
     
-    // Convert image_path to full URLs
+    // Convert image_path to full URLs with better error handling
     const membersWithUrls = await Promise.all(
-      data.map(async (member: any) => ({
-        ...member,
-        image: member.image_path ? await getImageUrl(member.image_path) : member.image
-      }))
+      data.map(async (member: any) => {
+        try {
+          let imageUrl = member.image || ''
+          
+          // Only try to generate URL if we have an image_path
+          if (member.image_path) {
+            const generatedUrl = await getImageUrl(member.image_path)
+            if (generatedUrl) {
+              imageUrl = generatedUrl
+            } else {
+              console.warn(`Failed to generate URL for image_path: ${member.image_path}`)
+            }
+          }
+          
+          return {
+            ...member,
+            image: imageUrl
+          }
+        } catch (urlError) {
+          console.error(`Error processing image for member ${member.id}:`, urlError)
+          // Return member with original image field if URL generation fails
+          return member
+        }
+      })
     )
     
     return membersWithUrls
@@ -300,12 +412,32 @@ export const getProjectManagers = async () => {
     
     if (error) throw error
     
-    // Convert image_path to full URLs
+    // Convert image_path to full URLs with better error handling
     const membersWithUrls = await Promise.all(
-      data.map(async (member: any) => ({
-        ...member,
-        image: member.image_path ? await getImageUrl(member.image_path) : member.image
-      }))
+      data.map(async (member: any) => {
+        try {
+          let imageUrl = member.image || ''
+          
+          // Only try to generate URL if we have an image_path
+          if (member.image_path) {
+            const generatedUrl = await getImageUrl(member.image_path)
+            if (generatedUrl) {
+              imageUrl = generatedUrl
+            } else {
+              console.warn(`Failed to generate URL for image_path: ${member.image_path}`)
+            }
+          }
+          
+          return {
+            ...member,
+            image: imageUrl
+          }
+        } catch (urlError) {
+          console.error(`Error processing image for member ${member.id}:`, urlError)
+          // Return member with original image field if URL generation fails
+          return member
+        }
+      })
     )
     
     return membersWithUrls
@@ -326,12 +458,32 @@ export const getMembers = async () => {
     
     if (error) throw error
     
-    // Convert image_path to full URLs
+    // Convert image_path to full URLs with better error handling
     const membersWithUrls = await Promise.all(
-      data.map(async (member: any) => ({
-        ...member,
-        image: member.image_path ? await getImageUrl(member.image_path) : member.image
-      }))
+      data.map(async (member: any) => {
+        try {
+          let imageUrl = member.image || ''
+          
+          // Only try to generate URL if we have an image_path
+          if (member.image_path) {
+            const generatedUrl = await getImageUrl(member.image_path)
+            if (generatedUrl) {
+              imageUrl = generatedUrl
+            } else {
+              console.warn(`Failed to generate URL for image_path: ${member.image_path}`)
+            }
+          }
+          
+          return {
+            ...member,
+            image: imageUrl
+          }
+        } catch (urlError) {
+          console.error(`Error processing image for member ${member.id}:`, urlError)
+          // Return member with original image field if URL generation fails
+          return member
+        }
+      })
     )
     
     return membersWithUrls
@@ -345,12 +497,30 @@ export const createExecMember = async (member: Omit<ExecMember, 'id' | 'created_
   try {
     const supabase = await getSupabaseClient()
     
+    // Validate required fields
+    if (!member.name?.trim() || !member.title?.trim()) {
+      throw new Error('Name and title are required')
+    }
+    
     const { data, error } = await supabase
       .from('exec_members')
-      .insert([member])
+      .insert([{
+        name: member.name.trim(),
+        title: member.title.trim(),
+        image: member.image || '',
+        image_path: member.image_path || null
+      }])
       .select()
     
-    if (error) throw error
+    if (error) {
+      console.error('Supabase error creating exec member:', error)
+      throw error
+    }
+    
+    if (!data || data.length === 0) {
+      throw new Error('No data returned from database insert')
+    }
+    
     return data[0]
   } catch (error) {
     console.error('Failed to create exec member:', error)
@@ -362,29 +532,65 @@ export const createProjectManager = async (member: Omit<ProjectManager, 'id' | '
   try {
     const supabase = await getSupabaseClient()
     
+    // Validate required fields
+    if (!member.name?.trim() || !member.title?.trim()) {
+      throw new Error('Name and title are required')
+    }
+    
     const { data, error } = await supabase
       .from('project_managers')
-      .insert([member])
+      .insert([{
+        name: member.name.trim(),
+        title: member.title.trim(),
+        image: member.image || '',
+        image_path: member.image_path || null
+      }])
       .select()
     
-    if (error) throw error
+    if (error) {
+      console.error('Supabase error creating project manager:', error)
+      throw error
+    }
+    
+    if (!data || data.length === 0) {
+      throw new Error('No data returned from database insert')
+    }
+    
     return data[0]
   } catch (error) {
     console.error('Failed to create project manager:', error)
     throw error
-    }
+  }
 }
 
 export const createMember = async (member: Omit<Member, 'id' | 'created_at' | 'updated_at'>) => {
   try {
     const supabase = await getSupabaseClient()
     
+    // Validate required fields
+    if (!member.name?.trim() || !member.title?.trim()) {
+      throw new Error('Name and title are required')
+    }
+    
     const { data, error } = await supabase
       .from('members')
-      .insert([member])
+      .insert([{
+        name: member.name.trim(),
+        title: member.title.trim(),
+        image: member.image || '',
+        image_path: member.image_path || null
+      }])
       .select()
     
-    if (error) throw error
+    if (error) {
+      console.error('Supabase error creating member:', error)
+      throw error
+    }
+    
+    if (!data || data.length === 0) {
+      throw new Error('No data returned from database insert')
+    }
+    
     return data[0]
   } catch (error) {
     console.error('Failed to create member:', error)
@@ -396,13 +602,33 @@ export const updateExecMember = async (id: string, updates: Partial<ExecMember>)
   try {
     const supabase = await getSupabaseClient()
     
+    // Validate that we have at least one field to update
+    if (!updates.name && !updates.title && !updates.image_path) {
+      throw new Error('At least one field must be provided for update')
+    }
+    
+    // Clean up the updates object
+    const cleanUpdates: any = {}
+    if (updates.name) cleanUpdates.name = updates.name.trim()
+    if (updates.title) cleanUpdates.title = updates.title.trim()
+    if (updates.image_path !== undefined) cleanUpdates.image_path = updates.image_path
+    // Don't set image field - it will be populated by the backend when fetching
+    
     const { data, error } = await supabase
       .from('exec_members')
-      .update(updates)
+      .update(cleanUpdates)
       .eq('id', id)
       .select()
     
-    if (error) throw error
+    if (error) {
+      console.error('Supabase error updating exec member:', error)
+      throw error
+    }
+    
+    if (!data || data.length === 0) {
+      throw new Error('No data returned from database update')
+    }
+    
     return data[0]
   } catch (error) {
     console.error('Failed to update exec member:', error)
@@ -414,13 +640,33 @@ export const updateProjectManager = async (id: string, updates: Partial<ProjectM
   try {
     const supabase = await getSupabaseClient()
     
+    // Validate that we have at least one field to update
+    if (!updates.name && !updates.title && !updates.image_path) {
+      throw new Error('At least one field must be provided for update')
+    }
+    
+    // Clean up the updates object
+    const cleanUpdates: any = {}
+    if (updates.name) cleanUpdates.name = updates.name.trim()
+    if (updates.title) cleanUpdates.title = updates.title.trim()
+    if (updates.image_path !== undefined) cleanUpdates.image_path = updates.image_path
+    // Don't set image field - it will be populated by the backend when fetching
+    
     const { data, error } = await supabase
       .from('project_managers')
-      .update(updates)
+      .update(cleanUpdates)
       .eq('id', id)
       .select()
     
-    if (error) throw error
+    if (error) {
+      console.error('Supabase error updating project manager:', error)
+      throw error
+    }
+    
+    if (!data || data.length === 0) {
+      throw new Error('No data returned from database update')
+    }
+    
     return data[0]
   } catch (error) {
     console.error('Failed to update project manager:', error)
@@ -432,13 +678,33 @@ export const updateMember = async (id: string, updates: Partial<Member>) => {
   try {
     const supabase = await getSupabaseClient()
     
+    // Validate that we have at least one field to update
+    if (!updates.name && !updates.title && !updates.image_path) {
+      throw new Error('At least one field must be provided for update')
+    }
+    
+    // Clean up the updates object
+    const cleanUpdates: any = {}
+    if (updates.name) cleanUpdates.name = updates.name.trim()
+    if (updates.title) cleanUpdates.title = updates.title.trim()
+    if (updates.image_path !== undefined) cleanUpdates.image_path = updates.image_path
+    // Don't set image field - it will be populated by the backend when fetching
+    
     const { data, error } = await supabase
       .from('members')
-      .update(updates)
+      .update(cleanUpdates)
       .eq('id', id)
       .select()
     
-    if (error) throw error
+    if (error) {
+      console.error('Supabase error updating member:', error)
+      throw error
+    }
+    
+    if (!data || data.length === 0) {
+      throw new Error('No data returned from database update')
+    }
+    
     return data[0]
   } catch (error) {
     console.error('Failed to update member:', error)

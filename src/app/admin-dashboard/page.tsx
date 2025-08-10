@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { uploadImage, getImageUrl, deleteImage, listAllImages, getBatchImageUrls } from '../../utils/supabase'
+import { uploadImage, getImageUrl, deleteImage, listAllImages, getBatchImageUrls, safeDeleteOldImage, validateImageAccess } from '../../utils/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { useMembers } from '../hooks/useMembers'
@@ -203,71 +203,135 @@ export default function AdminDashboardPage() {
   }
 
   const handleAddMember = async (memberData: { name: string; title: string; imageFile: File }, type: 'exec' | 'pm' | 'member') => {
+    console.log('AdminDashboardPage handleAddMember called', { memberData, type })
     try {
+      setError('') // Clear any previous errors
+      
+      // Validate input data
+      if (!memberData.name.trim() || !memberData.title.trim()) {
+        throw new Error('Name and title are required')
+      }
+      
       // First upload the image to Supabase storage
       const uploadResult = await uploadImage(memberData.imageFile)
       
       // Create member data with the storage path
       const memberDataForDB = {
-        name: memberData.name,
-        title: memberData.title,
+        name: memberData.name.trim(),
+        title: memberData.title.trim(),
         image: '', // This will be populated by the backend when fetching
         image_path: uploadResult.path // Store the storage path reference
       }
       
       // Add member to the appropriate table
+      let newMember
       if (type === 'exec') {
-        await addExecMember(memberDataForDB)
+        newMember = await addExecMember(memberDataForDB)
       } else if (type === 'pm') {
-        await addProjectManager(memberDataForDB)
+        newMember = await addProjectManager(memberDataForDB)
       } else {
-        await addMember(memberDataForDB)
+        newMember = await addMember(memberDataForDB)
+      }
+      
+      if (!newMember) {
+        throw new Error('Failed to create member in database')
       }
       
       setShowAddMember(false)
-      setSuccessMessage(`Successfully added ${memberData.name} with image uploaded`)
+      setSuccessMessage(`Successfully added ${memberData.name} as ${type === 'exec' ? 'Executive' : type === 'pm' ? 'Project Manager' : 'Member'}`)
       setTimeout(() => setSuccessMessage(''), 3000)
       
       // Refresh members list to show the new member
       await loadAllMembers()
     } catch (error) {
+      console.error('Error adding member:', error)
       setError(`Failed to add member: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      
+      // Note: In a production app, you might want to clean up the uploaded image
+      // if the database operation fails, but for now we'll keep it simple
     }
   }
 
   const handleUpdateMember = async (id: string, updates: Partial<ExecMember | ProjectManager | Member> & { newImageFile?: File }, type: 'exec' | 'pm' | 'member') => {
+    console.log('AdminDashboardPage handleUpdateMember called', { id, updates, type })
     try {
+      setError('') // Clear any previous errors
+      
+      // Validate input data
+      if (!updates.name?.trim() && !updates.title?.trim() && !updates.newImageFile) {
+        throw new Error('At least one field must be updated')
+      }
+      
       let finalUpdates = { ...updates }
+      let oldImagePath: string | null = null
       
       // If there's a new image file, upload it first
       if (updates.newImageFile) {
+        // Get the current member to find the old image path
+        let currentMember
+        if (type === 'exec') {
+          currentMember = execMembers.find(m => m.id === id)
+        } else if (type === 'pm') {
+          currentMember = projectManagers.find(m => m.id === id)
+        } else {
+          currentMember = members.find(m => m.id === id)
+        }
+        
+        // Store the old image path for cleanup
+        if (currentMember?.image_path) {
+          oldImagePath = currentMember.image_path
+        }
+        
         const uploadResult = await uploadImage(updates.newImageFile)
+        
+        // Validate that the new image is accessible
+        const isImageAccessible = await validateImageAccess(uploadResult.path)
+        if (!isImageAccessible) {
+          throw new Error('Failed to validate uploaded image - please try again')
+        }
         
         // Update the image_path with the new storage path
         finalUpdates.image_path = uploadResult.path
-        finalUpdates.image = '' // This will be populated by the backend when fetching
         
         // Remove the newImageFile from updates since it's not part of the database schema
         delete (finalUpdates as any).newImageFile
       }
       
+      // Clean up the updates object - remove undefined values and trim strings
+      if (finalUpdates.name) finalUpdates.name = finalUpdates.name.trim()
+      if (finalUpdates.title) finalUpdates.title = finalUpdates.title.trim()
+      
       // Update the member in the appropriate table
+      let updatedMember
       if (type === 'exec') {
-        await updateExecMemberById(id, finalUpdates)
+        updatedMember = await updateExecMemberById(id, finalUpdates)
       } else if (type === 'pm') {
-        await updateProjectManagerById(id, finalUpdates)
+        updatedMember = await updateProjectManagerById(id, finalUpdates)
       } else {
-        await updateMemberById(id, finalUpdates)
+        updatedMember = await updateMemberById(id, finalUpdates)
+      }
+      
+      if (!updatedMember) {
+        throw new Error('Failed to update member in database')
+      }
+      
+      // Clean up old image from storage if it was replaced
+      if (oldImagePath) {
+        await safeDeleteOldImage(oldImagePath)
       }
       
       setEditingMember(null)
-      setSuccessMessage(`Successfully updated member${updates.newImageFile ? ' with new image' : ''}`)
+      setSuccessMessage(`Successfully updated ${updatedMember.name}${updates.newImageFile ? ' with new image' : ''}`)
       setTimeout(() => setSuccessMessage(''), 3000)
       
       // Refresh members list to show the updated member
       await loadAllMembers()
     } catch (error) {
+      console.error('Error updating member:', error)
       setError(`Failed to update member: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      
+      // Note: In a production app, you might want to clean up the uploaded image
+      // if the database operation fails, but for now we'll keep it simple
     }
   }
 
