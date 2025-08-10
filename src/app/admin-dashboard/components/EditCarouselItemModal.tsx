@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { CarouselItem } from '../../types/members'
-import { uploadImage, uploadVideo } from '../../../utils/supabase'
+import { uploadImage, uploadVideo, getImageUrl, getVideoUrl } from '../../../utils/supabase'
 
 interface EditCarouselItemModalProps {
   isOpen: boolean
@@ -20,6 +20,7 @@ export default function EditCarouselItemModal({ isOpen, onClose, onSubmit, item 
   const [newMediaFile, setNewMediaFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
+  const [mediaUrl, setMediaUrl] = useState<string>('')
 
   // Update form when item changes
   useEffect(() => {
@@ -30,6 +31,26 @@ export default function EditCarouselItemModal({ isOpen, onClose, onSubmit, item 
       setOrder(item.item.order)
       setNewMediaFile(null)
       setError('')
+      
+      // Generate media URL for preview
+      const generateMediaUrl = async () => {
+        try {
+          if (item.item.type === 'image' && item.item.image_path) {
+            const url = await getImageUrl(item.item.image_path)
+            setMediaUrl(url)
+          } else if (item.item.type === 'video' && item.item.video_path) {
+            const url = await getVideoUrl(item.item.video_path)
+            setMediaUrl(url)
+          } else {
+            setMediaUrl('')
+          }
+        } catch (err) {
+          console.error('Failed to generate media URL:', err)
+          setMediaUrl('')
+        }
+      }
+      
+      generateMediaUrl()
     }
   }, [item])
 
@@ -226,29 +247,29 @@ export default function EditCarouselItemModal({ isOpen, onClose, onSubmit, item 
               Current {type === 'image' ? 'Image' : 'Video'}
             </label>
             <div className="border border-gray-300 rounded-md p-3 bg-gray-50">
-              {type === 'image' ? (
-                <Image 
-                  src={item.item.image_path ? 
-                       (item.item.src.startsWith('http://') || item.item.src.startsWith('https://') ? item.item.src : 
-                        item.item.src.startsWith('/') ? item.item.src : `/${item.item.src}`) : 
-                       item.item.src.startsWith('/') ? item.item.src : `/${item.item.src}`} 
-                  alt="Current media" 
-                  width={400}
-                  height={128}
-                  className="w-full h-32 object-cover rounded"
-                />
+              {mediaUrl ? (
+                type === 'image' ? (
+                  <Image 
+                    src={mediaUrl}
+                    alt="Current media" 
+                    width={400}
+                    height={128}
+                    className="w-full h-32 object-cover rounded"
+                  />
+                ) : (
+                  <video 
+                    src={mediaUrl}
+                    className="w-full h-32 object-cover rounded"
+                    muted
+                    loop
+                    autoPlay
+                    playsInline
+                  />
+                )
               ) : (
-                <video 
-                  src={item.item.video_path ? 
-                       (item.item.src.startsWith('http://') || item.item.src.startsWith('https://') ? item.item.src : 
-                        item.item.src.startsWith('/') ? item.item.src : `/${item.item.src}`) : 
-                       item.item.src.startsWith('/') ? item.item.src : `/${item.item.src}`} 
-                  className="w-full h-32 object-cover rounded"
-                  muted
-                  loop
-                  autoPlay
-                  playsInline
-                />
+                <div className="w-full h-32 bg-gray-200 rounded flex items-center justify-center">
+                  <p className="text-gray-500 text-sm">Loading media preview...</p>
+                </div>
               )}
               <p className="text-xs text-gray-500 mt-2">
                 Current file: {item.item.image_path || item.item.video_path || item.item.src}
