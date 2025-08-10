@@ -132,7 +132,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="hover:opacity-80 transition-opacity">
             <Image
-              src="/logos/mdb_4.svg"
+              src="/logos/mdb_5.png"
               alt="MDB Website"
               width={120}
               height={40}

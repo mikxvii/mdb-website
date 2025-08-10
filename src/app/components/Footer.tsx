@@ -16,7 +16,7 @@ export default function Footer() {
           <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
             <div className="flex items-center mb-4">
               <Image
-                src="/logos/mdb_4.svg"
+                src="/logos/mdb_5.png"
                 alt="MDB Logo"
                 width={80}
                 height={80}
