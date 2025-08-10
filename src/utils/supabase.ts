@@ -285,6 +285,142 @@ export const getImageUrl = async (path: string) => {
   }
 }
 
+// Get video URL
+export const getVideoUrl = async (path: string) => {
+  try {
+    if (!path) {
+      console.warn('No video path provided to getVideoUrl')
+      return ''
+    }
+    
+    const supabase = await getSupabaseClient()
+    const { data } = supabase.storage
+      .from('videos')
+      .getPublicUrl(path)
+    
+    return data.publicUrl
+  } catch (error) {
+    console.error('Failed to get video URL for path:', path, error)
+    return ''
+  }
+}
+
+// List all videos from Supabase storage
+export const listAllVideos = async () => {
+  try {
+    const supabase = await getSupabaseClient()
+    
+    // Check if user is authenticated as admin
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      throw new Error('Authentication required: Please log in as admin')
+    }
+    
+    // List all files in the videos bucket
+    const { data, error } = await supabase.storage
+      .from('videos')
+      .list('', {
+        limit: 1000,
+        offset: 0,
+        sortBy: { column: 'created_at', order: 'desc' }
+      })
+    
+    if (error) {
+      console.error('Error listing videos:', error)
+      throw error
+    }
+    
+    if (!data) {
+      return []
+    }
+    
+    // Filter out folders and return only video files
+    const videoFiles = data.filter((item: any) => 
+      item.id && 
+      !item.name?.startsWith('.') && 
+      item.metadata?.mimetype?.startsWith('video/')
+    )
+    
+    return videoFiles
+  } catch (error) {
+    console.error('Failed to list videos:', error)
+    throw error
+  }
+}
+
+// Get batch video URLs for faster loading
+export const getBatchVideoUrls = async (paths: string[]) => {
+  try {
+    if (paths.length === 0) return []
+    
+    // Use the new batch API endpoint for better performance
+    const batchParam = encodeURIComponent(JSON.stringify(paths))
+    const response = await fetch(`/api/supabase-config?batch=${batchParam}&type=videos`)
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    const data = await response.json()
+    
+    if (!data.urls || !Array.isArray(data.urls)) {
+      throw new Error('Invalid response format from batch API')
+    }
+    
+    return data.urls
+  } catch (error) {
+    console.error('Error in getBatchVideoUrls:', error)
+    // Fallback to individual URL generation if batch fails
+    try {
+      const supabase = await getSupabaseClient()
+      const urls = paths.map(path => {
+        const { data } = supabase.storage
+          .from('videos')
+          .getPublicUrl(path)
+        return data.publicUrl
+      })
+      return urls
+    } catch (fallbackError) {
+      console.error('Fallback URL generation also failed:', fallbackError)
+      throw error
+    }
+  }
+}
+
+// Delete video from Supabase storage
+export const deleteVideo = async (path: string) => {
+  try {
+    if (!path) {
+      throw new Error('No video path provided')
+    }
+    
+    const supabase = await getSupabaseClient()
+    
+    // Check if user is authenticated as admin
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      throw new Error('Authentication required: Please log in as admin')
+    }
+    
+    console.log('Deleting video from Supabase:', path)
+    
+    const { error } = await supabase.storage
+      .from('videos')
+      .remove([path])
+    
+    if (error) {
+      console.error('Supabase delete error:', error)
+      throw error
+    }
+    
+    console.log('Video deleted successfully:', path)
+    return true
+  } catch (error) {
+    console.error('Error in deleteVideo function:', error)
+    throw error
+  }
+}
+
 // List all images from Supabase storage with optimized querying
 export const listAllImages = async () => {
   try {
@@ -324,7 +460,7 @@ export const getBatchImageUrls = async (paths: string[]) => {
     
     // Use the new batch API endpoint for better performance
     const batchParam = encodeURIComponent(JSON.stringify(paths))
-    const response = await fetch(`/api/supabase-config?batch=${batchParam}`)
+    const response = await fetch(`/api/supabase-config?batch=${batchParam}&type=images`)
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)

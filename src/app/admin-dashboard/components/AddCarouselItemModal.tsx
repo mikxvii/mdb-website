@@ -70,6 +70,8 @@ export default function AddCarouselItemModal({ isOpen, onClose, onSubmit }: AddC
         caption: caption.trim(),
         strip,
         order,
+        image_path: type === 'image' ? uploadResult.path : undefined,
+        video_path: type === 'video' ? uploadResult.path : undefined,
         mediaFile
       }
 

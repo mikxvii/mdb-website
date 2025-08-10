@@ -33,6 +33,30 @@ export default function EditCarouselItemModal({ isOpen, onClose, onSubmit, item 
     }
   }, [item])
 
+  const getMediaUrl = (item: CarouselItem, type: 'image' | 'video'): string => {
+    if (type === 'video') {
+      if (item.video_path) {
+        // Use the src directly if it's already a full URL, otherwise construct it
+        if (item.src && (item.src.startsWith('http://') || item.src.startsWith('https://'))) {
+          return item.src
+        }
+        // For now, return the src as is - the parent component will handle URL construction
+        return item.src
+      }
+      return item.src
+    } else {
+      if (item.image_path) {
+        // Use the src directly if it's already a full URL, otherwise construct it
+        if (item.src && (item.src.startsWith('http://') || item.src.startsWith('https://'))) {
+          return item.src
+        }
+        // For now, return the src as is - the parent component will handle URL construction
+        return item.src
+      }
+      return item.src
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -62,17 +86,24 @@ export default function EditCarouselItemModal({ isOpen, onClose, onSubmit, item 
         if (type === 'image') {
           uploadResult = await uploadImage(newMediaFile)
           updates.image_path = uploadResult.path
+          updates.video_path = undefined // Clear video path if switching to image
         } else {
           uploadResult = await uploadVideo(newMediaFile)
           updates.video_path = uploadResult.path
+          updates.image_path = undefined // Clear image path if switching to video
         }
         updates.src = uploadResult.path
         updates.newMediaFile = newMediaFile
       }
 
-      // If type changed, update the type
+      // If type changed, update the type and clear the opposite path
       if (type !== item.item.type) {
         updates.type = type
+        if (type === 'image') {
+          updates.video_path = undefined
+        } else {
+          updates.image_path = undefined
+        }
       }
 
       onSubmit(item.item.id, updates)
@@ -197,7 +228,10 @@ export default function EditCarouselItemModal({ isOpen, onClose, onSubmit, item 
             <div className="border border-gray-300 rounded-md p-3 bg-gray-50">
               {type === 'image' ? (
                 <Image 
-                  src={item.item.image_path || item.item.src} 
+                  src={item.item.image_path ? 
+                       (item.item.src.startsWith('http://') || item.item.src.startsWith('https://') ? item.item.src : 
+                        item.item.src.startsWith('/') ? item.item.src : `/${item.item.src}`) : 
+                       item.item.src.startsWith('/') ? item.item.src : `/${item.item.src}`} 
                   alt="Current media" 
                   width={400}
                   height={128}
@@ -205,10 +239,15 @@ export default function EditCarouselItemModal({ isOpen, onClose, onSubmit, item 
                 />
               ) : (
                 <video 
-                  src={item.item.video_path || item.item.src} 
+                  src={item.item.video_path ? 
+                       (item.item.src.startsWith('http://') || item.item.src.startsWith('https://') ? item.item.src : 
+                        item.item.src.startsWith('/') ? item.item.src : `/${item.item.src}`) : 
+                       item.item.src.startsWith('/') ? item.item.src : `/${item.item.src}`} 
                   className="w-full h-32 object-cover rounded"
                   muted
                   loop
+                  autoPlay
+                  playsInline
                 />
               )}
               <p className="text-xs text-gray-500 mt-2">

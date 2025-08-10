@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
-import { uploadImage, getImageUrl, deleteImage, listAllImages, getBatchImageUrls, safeDeleteOldImage, validateImageAccess, getSupabaseClient, getContactSubmissions, deleteContactSubmission } from '../../utils/supabase'
+import { getImageUrl, deleteImage, listAllImages, getBatchImageUrls, safeDeleteOldImage, validateImageAccess, getSupabaseClient, getContactSubmissions, deleteContactSubmission, listAllVideos, getBatchVideoUrls, deleteVideo, uploadImage, uploadVideo } from '../../utils/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { useMembers } from '../hooks/useMembers'
@@ -14,14 +14,18 @@ import AddCarouselItemModal from './components/AddCarouselItemModal'
 import EditCarouselItemModal from './components/EditCarouselItemModal'
 
 export default function AdminDashboardPage() {
-  const [uploading, setUploading] = useState(false)
+
   const [loadingImages, setLoadingImages] = useState(false)
+  const [loadingVideos, setLoadingVideos] = useState(false)
   const [uploadedImages, setUploadedImages] = useState<Array<{path: string, url: string, name: string}>>([])
+  const [uploadedVideos, setUploadedVideos] = useState<Array<{path: string, url: string, name: string}>>([])
   const [error, setError] = useState<string>('')
   const [successMessage, setSuccessMessage] = useState<string>('')
   const [imageCache, setImageCache] = useState<Map<string, string>>(new Map())
+  const [videoCache, setVideoCache] = useState<Map<string, string>>(new Map())
   const [carouselImageCache, setCarouselImageCache] = useState<Map<string, string>>(new Map())
-  const [activeTab, setActiveTab] = useState<'images' | 'members' | 'carousel' | 'submissions'>('images')
+  const [carouselVideoCache, setCarouselVideoCache] = useState<Map<string, string>>(new Map())
+  const [activeTab, setActiveTab] = useState<'media' | 'members' | 'carousel' | 'submissions'>('media')
   const [showAddMember, setShowAddMember] = useState(false)
   const [editingMember, setEditingMember] = useState<{type: 'exec' | 'pm' | 'member', member: any} | null>(null)
   const [showAddCarouselItem, setShowAddCarouselItem] = useState(false)
@@ -71,45 +75,60 @@ export default function AdminDashboardPage() {
     }
   }, [])
 
-  const loadCarouselImages = useCallback(async () => {
+  const loadCarouselMedia = useCallback(async () => {
     try {
       if (carouselItems.length === 0) return
       
-      // Extract unique image paths from carousel items
+      // Extract unique image and video paths from carousel items
       const imagePaths = carouselItems
         .filter(item => item.type === 'image' && item.image_path)
         .map(item => item.image_path!)
         .filter((path, index, arr) => arr.indexOf(path) === index) // Remove duplicates
       
-      if (imagePaths.length === 0) return
+      const videoPaths = carouselItems
+        .filter(item => item.type === 'video' && item.video_path)
+        .map(item => item.video_path!)
+        .filter((path, index, arr) => arr.indexOf(path) === index) // Remove duplicates
       
-      console.log(`Loading ${imagePaths.length} carousel images...`)
+      if (imagePaths.length === 0 && videoPaths.length === 0) return
+      
+      console.log(`Loading ${imagePaths.length} carousel images and ${videoPaths.length} videos...`)
       
       // Use batch URL generation for carousel images
-      const urls = await getBatchImageUrls(imagePaths)
+      if (imagePaths.length > 0) {
+        const imageUrls = await getBatchImageUrls(imagePaths)
+        const newCarouselImageCache = new Map()
+        imagePaths.forEach((path, index) => {
+          newCarouselImageCache.set(path, imageUrls[index])
+        })
+        setCarouselImageCache(newCarouselImageCache)
+        console.log(`✅ Loaded ${imageUrls.length} carousel image URLs`)
+      }
       
-      // Update carousel image cache
-      const newCarouselCache = new Map()
-      imagePaths.forEach((path, index) => {
-        newCarouselCache.set(path, urls[index])
-      })
-      setCarouselImageCache(newCarouselCache)
-      
-      console.log(`✅ Loaded ${urls.length} carousel image URLs`)
+      // Use batch URL generation for carousel videos
+      if (videoPaths.length > 0) {
+        const videoUrls = await getBatchVideoUrls(videoPaths)
+        const newCarouselVideoCache = new Map()
+        videoPaths.forEach((path, index) => {
+          newCarouselVideoCache.set(path, videoUrls[index])
+        })
+        setCarouselVideoCache(newCarouselVideoCache)
+        console.log(`✅ Loaded ${videoUrls.length} carousel video URLs`)
+      }
       
     } catch (error) {
-      console.error('Failed to load carousel images:', error)
-      setError(`Failed to load carousel images: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      console.error('Failed to load carousel media:', error)
+      setError(`Failed to load carousel media: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }, [carouselItems])
 
-  const getCarouselImageUrl = useCallback(async (item: CarouselItem): Promise<string> => {
+  const getCarouselMediaUrl = useCallback((item: CarouselItem): string => {
     if (item.type === 'video') {
-      const supabase = await getSupabaseClient()
-      const { data } = supabase.storage
-        .from('videos')
-        .getPublicUrl(item.video_path || '')
-      return data.publicUrl
+      if (item.video_path && carouselVideoCache.has(item.video_path)) {
+        return carouselVideoCache.get(item.video_path)!
+      }
+      // Fallback to src if not in cache
+      return item.src || ''
     }
     
     // For images, try to get from cache first
@@ -117,8 +136,9 @@ export default function AdminDashboardPage() {
       return carouselImageCache.get(item.image_path)!
     }
     
-    return item.src
-  }, [carouselImageCache])
+    // Fallback to src if not in cache
+    return item.src || ''
+  }, [carouselImageCache, carouselVideoCache])
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -127,20 +147,21 @@ export default function AdminDashboardPage() {
       return
     }
     
-    // Load existing images when authenticated
+    // Load existing media when authenticated
     if (!authLoading && isAuthenticated) {
       loadExistingImages(false) // Don't show performance metrics on initial load
+      loadExistingVideos(false) // Don't show performance metrics on initial load
       loadCarouselItems() // Load carousel items
       loadSubmissions() // Load contact submissions
     }
   }, [isAuthenticated, authLoading, router])
 
-  // Load carousel images when carousel items change
+  // Load carousel media when carousel items change
   useEffect(() => {
     if (carouselItems.length > 0) {
-      loadCarouselImages()
+      loadCarouselMedia()
     }
-  }, [carouselItems, loadCarouselImages])
+  }, [carouselItems, loadCarouselMedia])
 
   const loadExistingImages = useCallback(async (showPerformance = true) => {
     try {
@@ -202,48 +223,67 @@ export default function AdminDashboardPage() {
     }
   }, [])
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    setUploading(true)
-    setError('')
-
+  const loadExistingVideos = useCallback(async (showPerformance = true) => {
     try {
-      const result = await uploadImage(file)
+      setLoadingVideos(true)
+      setError('')
       
-      // Use cached URL if available, otherwise fetch it
-      let imageUrl = imageCache.get(result.path)
-      if (!imageUrl) {
-        imageUrl = await getImageUrl(result.path)
-        // Update cache
-        setImageCache(prev => new Map(prev).set(result.path, imageUrl!))
+      const startTime = performance.now()
+      if (showPerformance) console.time('Video loading performance')
+      
+      // Fetch all video files from Supabase
+      const videoFiles = await listAllVideos()
+      if (showPerformance) console.log(`Found ${videoFiles.length} videos in storage`)
+      
+      if (videoFiles.length === 0) {
+        setUploadedVideos([])
+        setLoadingVideos(false)
+        return
       }
       
-      // Ensure we have a valid URL
-      if (!imageUrl) {
-        throw new Error('Failed to generate image URL')
+      // Extract file names for batch URL generation
+      const fileNames = videoFiles.map((file: any) => file.name)
+      
+      // Use batch URL generation for much faster loading
+      const urls = await getBatchVideoUrls(fileNames)
+      if (showPerformance) console.log(`Generated ${urls.length} URLs in batch`)
+      
+      // Create video objects with cached URLs
+      const videos = fileNames.map((name: string, index: number) => ({
+        path: name,
+        url: urls[index],
+        name: name
+      }))
+      
+      // Update cache and videos
+      const newCache = new Map()
+      videos.forEach((video: {path: string, url: string, name: string}) => newCache.set(video.path, video.url))
+      setVideoCache(newCache)
+      setUploadedVideos(videos)
+      
+      const endTime = performance.now()
+      const loadTime = endTime - startTime
+      
+      if (showPerformance) {
+        console.timeEnd('Video loading performance')
+        console.log(`🚀 Loaded ${videos.length} videos in ${loadTime.toFixed(2)}ms`)
+        
+        // Show performance feedback
+        if (loadTime < 1000) {
+          setSuccessMessage(`⚡ Lightning fast! Loaded ${videos.length} videos in ${loadTime.toFixed(0)}ms`)
+          setTimeout(() => setSuccessMessage(''), 4000)
+        }
       }
       
-      // Add new image to the list
-      setUploadedImages(prev => [...prev, {
-        path: result.path,
-        url: imageUrl,
-        name: file.name
-      }])
-      
-      // Show success message
-      setSuccessMessage(`Successfully uploaded ${file.name}`)
-      setTimeout(() => setSuccessMessage(''), 3000)
-      
-      // Clear the file input
-      event.target.value = ''
     } catch (error) {
-      setError(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      console.error('Failed to load existing videos:', error)
+      setError(`Failed to load existing videos: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
-      setUploading(false)
+      setLoadingVideos(false)
     }
-  }
+  }, [])
+
+
 
   const removeImage = async (pathToRemove: string) => {
     try {
@@ -263,24 +303,27 @@ export default function AdminDashboardPage() {
     }
   }
 
-  const clearAllImages = async () => {
+  const removeVideo = async (pathToRemove: string) => {
     try {
-      console.log('Clearing all images from Supabase...')
+      console.log('Deleting video from Supabase:', pathToRemove)
       
-      // Delete all images from Supabase
-      const deletePromises = uploadedImages.map(img => deleteImage(img.path))
-      await Promise.all(deletePromises)
-      console.log('Successfully deleted all images from Supabase')
+      // Delete from Supabase storage
+      await deleteVideo(pathToRemove)
+      console.log('Successfully deleted from Supabase:', pathToRemove)
       
-      // Clear from UI after successful deletion
-      setUploadedImages([])
-      console.log('Cleared all images from UI')
+      // Remove from UI after successful deletion
+      setUploadedVideos(prev => prev.filter(video => video.path !== pathToRemove))
+      console.log('Removed from UI:', pathToRemove)
       
     } catch (error) {
-      console.error('Failed to clear all images:', error)
-      setError(`Failed to clear all images: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      console.error('Failed to delete video:', error)
+      setError(`Failed to delete video: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
+
+  // clearAllImages function removed for safety - prevents accidental deletion of all media
+
+  // clearAllVideos function removed for safety - prevents accidental deletion of all media
 
   const signOut = async () => {
     try {
@@ -472,8 +515,9 @@ export default function AdminDashboardPage() {
       setSuccessMessage(`Successfully added carousel item to strip ${itemData.strip}`)
       setTimeout(() => setSuccessMessage(''), 3000)
       
-      // Refresh carousel items
+      // Refresh carousel items and media cache
       await loadCarouselItems()
+      await loadCarouselMedia()
     } catch (error) {
       console.error('Error adding carousel item:', error)
       setError(`Failed to add carousel item: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -571,14 +615,14 @@ export default function AdminDashboardPage() {
         <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
           <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
             <button
-              onClick={() => setActiveTab('images')}
+              onClick={() => setActiveTab('media')}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                activeTab === 'images'
+                activeTab === 'media'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Image Management
+              Media Inventory
             </button>
             <button
               onClick={() => setActiveTab('members')}
@@ -613,73 +657,32 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Image Management Tab */}
-        {activeTab === 'images' && (
+        {/* Media Inventory Tab */}
+        {activeTab === 'media' && (
           <>
-            {/* Upload Section */}
+            {/* Images Management */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-              <h2 className="text-xl font-semibold mb-4">Upload Images</h2>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-mdb-blue transition-colors">
-                <div className="mb-4">
-                  <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Manage Images</h2>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => loadExistingImages(true)}
+                    disabled={loadingImages}
+                    className="px-4 py-2 bg-mdb-blue text-white rounded hover:bg-mdb-blue/90 transition-colors disabled:opacity-50"
+                  >
+                    {loadingImages ? 'Loading...' : 'Refresh Images'}
+                  </button>
+                  {/* Clear All Images button removed for safety */}
                 </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  disabled={uploading}
-                  className="hidden"
-                  id="file-upload"
-                  multiple
-                />
-                <label
-                  htmlFor="file-upload"
-                  className="cursor-pointer inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-mdb-blue hover:bg-mdb-blue/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                >
-                  {uploading ? 'Uploading...' : 'Choose Images to Upload'}
-                </label>
-                <p className="mt-2 text-sm text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                {uploading && (
-                  <div className="mt-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mdb-blue mx-auto"></div>
-                    <p className="text-gray-600 mt-2">Processing image...</p>
-                  </div>
-                )}
               </div>
-            </div>
 
-            {/* Images Display */}
-            {loadingImages ? (
-              <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+              {loadingImages ? (
                 <div className="text-center py-12">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-mdb-blue mx-auto mb-4"></div>
                   <p className="text-gray-600">Loading existing images...</p>
                   <p className="text-sm text-gray-500 mt-2">This should be much faster now! 🚀</p>
                 </div>
-              </div>
-            ) : uploadedImages.length > 0 ? (
-              <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">Manage Images ({uploadedImages.length})</h2>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => loadExistingImages(true)}
-                      disabled={loadingImages}
-                      className="px-4 py-2 bg-mdb-blue text-white rounded hover:bg-mdb-blue/90 transition-colors disabled:opacity-50"
-                    >
-                      {loadingImages ? 'Loading...' : 'Refresh'}
-                    </button>
-                    <button
-                      onClick={clearAllImages}
-                      className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-                    >
-                      Clear All Images
-                    </button>
-                  </div>
-                </div>
-                
+              ) : uploadedImages.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                   {uploadedImages.map((image, index) => (
                     <div key={index} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
@@ -711,9 +714,7 @@ export default function AdminDashboardPage() {
                     </div>
                   ))}
                 </div>
-              </div>
-            ) : (
-              <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+              ) : (
                 <div className="text-center py-12">
                   <div className="mb-4">
                     <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
@@ -721,10 +722,81 @@ export default function AdminDashboardPage() {
                     </svg>
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No images yet</h3>
-                  <p className="text-gray-500">Upload your first image to get started</p>
+                  <p className="text-gray-500">Images will appear here once they are uploaded through other means</p>
+                </div>
+              )}
+            </div>
+
+            {/* Videos Management */}
+            <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Manage Videos</h2>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => loadExistingVideos(true)}
+                    disabled={loadingVideos}
+                    className="px-4 py-2 bg-mdb-blue text-white rounded hover:bg-mdb-blue/90 transition-colors disabled:opacity-50"
+                  >
+                    {loadingVideos ? 'Loading...' : 'Refresh Videos'}
+                  </button>
+                  {/* Clear All Videos button removed for safety */}
                 </div>
               </div>
-            )}
+
+              {loadingVideos ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-mdb-blue mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading existing videos...</p>
+                  <p className="text-sm text-gray-500 mt-2">This should be much faster now! 🚀</p>
+                </div>
+              ) : uploadedVideos.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  {uploadedVideos.map((video, index) => (
+                    <div key={index} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                      <div className="relative group">
+                        <video
+                          src={video.url}
+                          className="w-full h-40 object-cover"
+                          muted
+                          loop
+                          playsInline
+                          autoPlay
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+                          <button
+                            onClick={() => removeVideo(video.path)}
+                            className="opacity-0 group-hover:opacity-100 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-medium hover:bg-red-700 transition-all duration-200 transform scale-90 group-hover:scale-100"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                      <div className="p-3">
+                        <p className="text-sm text-gray-800 font-medium mb-1 truncate" title={video.name}>
+                          {video.name}
+                        </p>
+                        <p className="text-xs text-gray-500 font-mono truncate" title={video.path}>
+                          {video.path}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="mb-4">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                      <path d="M15 10l4.764-2.382a2 2 0 012.236 0L26.764 10H30a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2v-8a2 2 0 012-2h4.764z" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M9 15l6-3 6 3" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No videos yet</h3>
+                  <p className="text-gray-500">Videos will appear here once they are uploaded through other means</p>
+                </div>
+              )}
+            </div>
+
+
           </>
         )}
 
@@ -912,11 +984,11 @@ export default function AdminDashboardPage() {
                     {carouselLoading ? 'Loading...' : 'Refresh'}
                   </button>
                   <button
-                    onClick={loadCarouselImages}
+                    onClick={loadCarouselMedia}
                     disabled={carouselLoading}
                     className="px-4 py-2 bg-mdb-blue text-white rounded hover:bg-mdb-blue/90 transition-colors disabled:opacity-50"
                   >
-                    Refresh Images
+                    Refresh Images & Videos
                   </button>
                   <button
                     onClick={() => setShowAddCarouselItem(true)}
@@ -933,10 +1005,10 @@ export default function AdminDashboardPage() {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-mdb-blue mx-auto mb-2"></div>
                   <p className="text-gray-600">Loading carousel items...</p>
                 </div>
-              ) : carouselImageCache.size === 0 && carouselItems.some(item => item.type === 'image') ? (
+              ) : carouselImageCache.size === 0 && carouselItems.some(item => item.type === 'image') || carouselVideoCache.size === 0 && carouselItems.some(item => item.type === 'video') ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-mdb-blue mx-auto mb-2"></div>
-                  <p className="text-gray-600">Loading carousel images...</p>
+                  <p className="text-gray-600">Loading carousel media...</p>
                   <p className="text-sm text-gray-500 mt-2">Converting storage paths to display URLs...</p>
                 </div>
               ) : (
@@ -948,25 +1020,35 @@ export default function AdminDashboardPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {getItemsByStrip(1).map((item) => (
                           <div key={item.id} className="bg-gray-50 rounded-lg p-4 border">
-                            <div className="mb-3">
+                            <div className="mb-3 relative group">
                               {item.type === 'image' ? (
                                 <Image
-                                  src={item.image_path ? carouselImageCache.get(item.image_path) || item.src : item.src}
+                                  src={getCarouselMediaUrl(item)}
                                   alt={item.caption}
                                   width={400}
                                   height={128}
                                   className="w-full h-32 object-cover rounded"
                                 />
                               ) : (
-                                <video
-                                  key={item.id}
-                                  src={`${process.env.SUPABASE_URL}/storage/v1/object/public/videos/${item.video_path}`}
-                                  className="w-full h-32 object-cover rounded"
-                                  autoPlay
-                                  loop
-                                  muted
-                                  playsInline
-                                />
+                                <div className="relative">
+                                  <video
+                                    key={item.id}
+                                    src={getCarouselMediaUrl(item)}
+                                    className="w-full h-32 object-cover rounded"
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
+                                  />
+                                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+                                    <button
+                                      onClick={() => handleDeleteCarouselItem(item.id!)}
+                                      className="opacity-0 group-hover:opacity-100 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-medium hover:bg-red-700 transition-all duration-200 transform scale-90 group-hover:scale-100"
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                </div>
                               )}
                             </div>
                             <div className="mb-3">
@@ -1003,25 +1085,35 @@ export default function AdminDashboardPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {getItemsByStrip(2).map((item) => (
                           <div key={item.id} className="bg-gray-50 rounded-lg p-4 border">
-                            <div className="mb-3">
+                            <div className="mb-3 relative group">
                               {item.type === 'image' ? (
                                 <Image
-                                  src={item.image_path ? carouselImageCache.get(item.image_path) || item.src : item.src}
+                                  src={getCarouselMediaUrl(item)}
                                   alt={item.caption}
                                   width={400}
                                   height={128}
                                   className="w-full h-32 object-cover rounded"
                                 />
                               ) : (
-                                <video
-                                  key={item.id}
-                                  src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/videos/${item.video_path}`}
-                                  className="w-full h-32 object-cover rounded"
-                                  autoPlay
-                                  loop
-                                  muted
-                                  playsInline
-                                />
+                                <div className="relative">
+                                  <video
+                                    key={item.id}
+                                    src={getCarouselMediaUrl(item)}
+                                    className="w-full h-32 object-cover rounded"
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
+                                  />
+                                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+                                    <button
+                                      onClick={() => handleDeleteCarouselItem(item.id!)}
+                                      className="opacity-0 group-hover:opacity-100 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-medium hover:bg-red-700 transition-all duration-200 transform scale-90 group-hover:scale-100"
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                </div>
                               )}
                             </div>
                             <div className="mb-3">
@@ -1058,25 +1150,35 @@ export default function AdminDashboardPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {getItemsByStrip(3).map((item) => (
                           <div key={item.id} className="bg-gray-50 rounded-lg p-4 border">
-                            <div className="mb-3">
+                            <div className="mb-3 relative group">
                               {item.type === 'image' ? (
                                 <Image
-                                  src={item.image_path ? carouselImageCache.get(item.image_path) || item.src : item.src}
+                                  src={getCarouselMediaUrl(item)}
                                   alt={item.caption}
                                   width={400}
                                   height={128}
                                   className="w-full h-32 object-cover rounded"
                                 />
                               ) : (
-                                <video
-                                  key={item.id}
-                                  src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/videos/${item.video_path}`}
-                                  className="w-full h-32 object-cover rounded"
-                                  autoPlay
-                                  loop
-                                  muted
-                                  playsInline
-                                />
+                                <div className="relative">
+                                  <video
+                                    key={item.id}
+                                    src={getCarouselMediaUrl(item)}
+                                    className="w-full h-32 object-cover rounded"
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
+                                  />
+                                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+                                    <button
+                                      onClick={() => handleDeleteCarouselItem(item.id!)}
+                                      className="opacity-0 group-hover:opacity-100 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-medium hover:bg-red-700 transition-all duration-200 transform scale-90 group-hover:scale-100"
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                </div>
                               )}
                             </div>
                             <div className="mb-3">
@@ -1194,8 +1296,16 @@ export default function AdminDashboardPage() {
               <span className="text-sm">{uploadedImages.length} Images</span>
             </div>
             <div className="flex items-center">
+              <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+              <span className="text-sm">{uploadedVideos.length} Videos</span>
+            </div>
+            <div className="flex items-center">
               <span className="w-3 h-3 bg-purple-500 rounded-full mr-2"></span>
-              <span className="text-sm">Cache: {imageCache.size} URLs</span>
+              <span className="text-sm">Image Cache: {imageCache.size} URLs</span>
+            </div>
+            <div className="flex items-center">
+              <span className="w-3 h-3 bg-teal-500 rounded-full mr-2"></span>
+              <span className="text-sm">Video Cache: {videoCache.size} URLs</span>
             </div>
             <div className="flex items-center">
               <span className="w-3 h-3 bg-yellow-500 rounded-full mr-2"></span>
@@ -1207,7 +1317,11 @@ export default function AdminDashboardPage() {
             </div>
             <div className="flex items-center">
               <span className="w-3 h-3 bg-pink-500 rounded-full mr-2"></span>
-              <span className="text-sm">Carousel Cache: {carouselImageCache.size} URLs</span>
+              <span className="text-sm">Carousel Image Cache: {carouselImageCache.size} URLs</span>
+            </div>
+            <div className="flex items-center">
+              <span className="w-3 h-3 bg-purple-500 rounded-full mr-2"></span>
+              <span className="text-sm">Carousel Video Cache: {carouselVideoCache.size} URLs</span>
             </div>
             <div className="flex items-center">
               <span className="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>

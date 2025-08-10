@@ -5,6 +5,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const path = searchParams.get('path')
   const batch = searchParams.get('batch')
+  const type = searchParams.get('type') // 'images' or 'videos'
   
   // Server-side environment variables (never exposed to client)
   const supabaseUrl = process.env.SUPABASE_URL
@@ -17,15 +18,18 @@ export async function GET(request: Request) {
     )
   }
 
-  // Handle batch image URL requests
+  // Handle batch URL requests
   if (batch) {
     try {
       const paths = JSON.parse(decodeURIComponent(batch))
       const supabase = createClient(supabaseUrl, supabaseAnonKey)
       
+      // Determine which bucket to use based on type parameter
+      const bucket = type === 'videos' ? 'videos' : 'images'
+      
       const urls = paths.map((path: string) => {
         const { data } = supabase.storage
-          .from('images')
+          .from(bucket)
           .getPublicUrl(path)
         return data.publicUrl
       })
