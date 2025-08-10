@@ -29,6 +29,10 @@ const nextConfig = {
   
   // Configure video handling
   webpack: (config) => {
+    // Suppress critical dependency warning for @supabase/realtime-js
+    config.module.exprContextCritical = false;
+    
+    // Configure media file handling
     config.module.rules.push({
       test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)$/,
       use: {
