@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { sendContactFormEmails } from '../../../utils/email'
 
 export async function POST(request: Request) {
   try {
@@ -43,6 +44,20 @@ export async function POST(request: Request) {
         { error: 'Failed to submit contact form' },
         { status: 500 }
       )
+    }
+
+    // Send emails using nodemailer
+    try {
+      await sendContactFormEmails({
+        name: name.trim(),
+        email: email.trim(),
+        subject: subject.trim(),
+        message: message.trim()
+      })
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError)
+      // Don't fail the entire request if emails fail
+      // The form submission was successful, just log the email error
     }
     
     return NextResponse.json({ 
