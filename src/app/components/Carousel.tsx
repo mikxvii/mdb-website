@@ -1,18 +1,16 @@
 'use client'
-import { useRef, useEffect, useState, useMemo } from 'react'
+import { useRef, useEffect, useMemo } from 'react'
 import Image from 'next/image'
+import { useTypingAnimation } from '../hooks/useTypingAnimation'
 
 export default function Carousel() {
   const carouselRef = useRef<HTMLDivElement>(null)
   const carouselRef2 = useRef<HTMLDivElement>(null)
   const carouselRef3 = useRef<HTMLDivElement>(null)
-  const [currentWordIndex, setCurrentWordIndex] = useState(0)
-  const [currentText, setCurrentText] = useState('')
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [typeSpeed, setTypeSpeed] = useState(100)
-
-  const words = useMemo(() => ['Beasts.', 'Bots.', 'Baddies.', 'Ballers.', 'Boomers.', 'Bruzz.', 'B.'], [])
   
+  const words = useMemo(() => ['Beasts.', 'Bots.', 'Baddies.', 'Ballers.', 'Boomers.', 'Bruzz.', 'B.'], [])
+  const { currentText } = useTypingAnimation({ words })
+
   // First carousel media and captions (top strip) - mixed images and videos
   const media1 = [
     { type: 'image', src: "/images/lafayette5.jpg" },
@@ -167,38 +165,6 @@ export default function Carousel() {
       }
     }
   }, [media1.length, media2.length, media3.length])
-
-  // Typing animation effect
-  useEffect(() => {
-    const currentWord = words[currentWordIndex]
-    
-    const handleType = () => {
-      if (isDeleting) {
-        // Backspace effect
-        setCurrentText(currentWord.substring(0, currentText.length - 1))
-        setTypeSpeed(50) // Faster deletion
-        
-        if (currentText === '') {
-          setIsDeleting(false)
-          setCurrentWordIndex((prev) => (prev + 1) % words.length)
-          setTypeSpeed(100) // Normal typing speed
-        }
-      } else {
-        // Typing effect
-        setCurrentText(currentWord.substring(0, currentText.length + 1))
-        setTypeSpeed(100)
-        
-        if (currentText === currentWord) {
-          // Pause before starting to delete
-          setTimeout(() => setIsDeleting(true), 2000)
-          return
-        }
-      }
-    }
-
-    const timer = setTimeout(handleType, typeSpeed)
-    return () => clearTimeout(timer)
-  }, [currentText, isDeleting, currentWordIndex, typeSpeed, words])
 
   return (
     <section className="w-screen bg-gradient-to-b from-mdb-light-blue to-white py-8 sm:py-12 md:py-16 relative left-1/2 -translate-x-1/2 overflow-hidden">

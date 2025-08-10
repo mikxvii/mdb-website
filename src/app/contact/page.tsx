@@ -1,23 +1,15 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useAnimationLoad } from '../hooks/useAnimationLoad'
 
 export default function Contact() {
-  const [isLoaded, setIsLoaded] = useState(false)
+  const { isLoaded } = useAnimationLoad()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     subject: '',
     message: ''
   })
-
-  useEffect(() => {
-    // Trigger animation on next frame to prevent flash
-    const timer = requestAnimationFrame(() => {
-      setIsLoaded(true)
-    })
-    
-    return () => cancelAnimationFrame(timer)
-  }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

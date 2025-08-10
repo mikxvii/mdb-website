@@ -1,11 +1,11 @@
 'use client'
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
+import { useSectionAnimation, useMultipleIntersectionObserver } from '../../hooks/useIntersectionObserver'
 
 export default function PurpAndComm() {
-  const [isVisible, setIsVisible] = useState(false)
+  const { isVisible, elementRef: sectionRef } = useSectionAnimation()
   const [counters, setCounters] = useState({ semesters: 0, projects: 0, members: 0 })
-  const sectionRef = useRef<HTMLElement>(null)
   
   // Individual section visibility states
   const [purposeVisible, setPurposeVisible] = useState(false)
@@ -16,63 +16,21 @@ export default function PurpAndComm() {
   const statsRef = useRef<HTMLDivElement>(null)
   const communityRef = useRef<HTMLDivElement>(null)
 
-  // Intersection Observer for animation trigger
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true)
-        }
-      },
-      { threshold: 0.3 }
-    )
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current)
-    }
-
-    return () => observer.disconnect()
-  }, [])
-
   // Individual section observers
+  const { visibilityStates } = useMultipleIntersectionObserver({
+    elements: [
+      { ref: purposeRef, threshold: 0.2 },
+      { ref: statsRef, threshold: 0.2 },
+      { ref: communityRef, threshold: 0.2 }
+    ]
+  })
+
+  // Update individual visibility states based on the hook results
   useEffect(() => {
-    const purposeObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setPurposeVisible(true)
-        }
-      },
-      { threshold: 0.2 }
-    )
-
-    const statsObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setStatsVisible(true)
-        }
-      },
-      { threshold: 0.2 }
-    )
-
-    const communityObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setCommunityVisible(true)
-        }
-      },
-      { threshold: 0.2 }
-    )
-
-    if (purposeRef.current) purposeObserver.observe(purposeRef.current)
-    if (statsRef.current) statsObserver.observe(statsRef.current)
-    if (communityRef.current) communityObserver.observe(communityRef.current)
-
-    return () => {
-      purposeObserver.disconnect()
-      statsObserver.disconnect()
-      communityObserver.disconnect()
-    }
-  }, [])
+    if (visibilityStates['element-0']) setPurposeVisible(true)
+    if (visibilityStates['element-1']) setStatsVisible(true)
+    if (visibilityStates['element-2']) setCommunityVisible(true)
+  }, [visibilityStates])
 
   // Counter animation
   useEffect(() => {

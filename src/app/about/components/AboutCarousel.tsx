@@ -1,7 +1,8 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
+import { useSectionAnimation } from '../../hooks/useIntersectionObserver'
 
 interface CarouselCard {
   icon: string
@@ -36,36 +37,7 @@ const cards: CarouselCard[] = [
 ]
 
 export default function AboutCarousel() {
-  const [isVisible, setIsVisible] = useState(false)
-  const sectionRef = useRef<HTMLElement>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsVisible(true)
-            observer.unobserve(entry.target)
-          }
-        })
-      },
-      {
-        threshold: 0.3,
-        rootMargin: '0px 0px -100px 0px'
-      }
-    )
-
-    const currentRef = sectionRef.current
-    if (currentRef) {
-      observer.observe(currentRef)
-    }
-
-    return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef)
-      }
-    }
-  }, [])
+  const { isVisible, elementRef: sectionRef } = useSectionAnimation<HTMLElement>()
 
   return (
     <section ref={sectionRef} className="py-16 bg-gradient-to-b from-white to-[#D1DFF2]">
