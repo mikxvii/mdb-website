@@ -4,7 +4,7 @@ import { ExecMember, ProjectManager, Member, CarouselItem } from '../app/types/m
 // Secure approach: Fetch credentials from server-side API
 let supabaseClient: any = null
 
-const getSupabaseClient = async () => {
+export const getSupabaseClient = async () => {
   if (supabaseClient) return supabaseClient
   
   try {

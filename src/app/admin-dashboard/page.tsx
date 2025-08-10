@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { uploadImage, getImageUrl, deleteImage, listAllImages, getBatchImageUrls, safeDeleteOldImage, validateImageAccess } from '../../utils/supabase'
+import { uploadImage, getImageUrl, deleteImage, listAllImages, getBatchImageUrls, safeDeleteOldImage, validateImageAccess, getSupabaseClient } from '../../utils/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { useMembers } from '../hooks/useMembers'
@@ -444,8 +444,8 @@ export default function AdminDashboardPage() {
         caption: itemData.caption,
         strip: itemData.strip,
         order: itemData.order,
-        image_path: itemData.type === 'image' ? itemData.src : null,
-        video_path: itemData.type === 'video' ? itemData.src : null
+        image_path: itemData.type === 'image' ? itemData.src : undefined,
+        video_path: itemData.type === 'video' ? itemData.src : undefined
       }
       
       await addCarouselItem(carouselItemData)
