@@ -267,20 +267,39 @@ export const listAllImages = async () => {
 // Batch get image URLs for much faster loading
 export const getBatchImageUrls = async (paths: string[]) => {
   try {
-    // Use Supabase's built-in URL generation for better performance
-    const supabase = await getSupabaseClient()
+    if (paths.length === 0) return []
     
-    const urls = paths.map(path => {
-      const { data } = supabase.storage
-        .from('images')
-        .getPublicUrl(path)
-      return data.publicUrl
-    })
+    // Use the new batch API endpoint for better performance
+    const batchParam = encodeURIComponent(JSON.stringify(paths))
+    const response = await fetch(`/api/supabase-config?batch=${batchParam}`)
     
-    return urls
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    const data = await response.json()
+    
+    if (!data.urls || !Array.isArray(data.urls)) {
+      throw new Error('Invalid response format from batch API')
+    }
+    
+    return data.urls
   } catch (error) {
     console.error('Error in getBatchImageUrls:', error)
-    throw error
+    // Fallback to individual URL generation if batch fails
+    try {
+      const supabase = await getSupabaseClient()
+      const urls = paths.map(path => {
+        const { data } = supabase.storage
+          .from('images')
+          .getPublicUrl(path)
+        return data.publicUrl
+      })
+      return urls
+    } catch (fallbackError) {
+      console.error('Fallback URL generation also failed:', fallbackError)
+      throw error
+    }
   }
 }
 
@@ -366,33 +385,25 @@ export const getExecMembers = async () => {
     
     if (error) throw error
     
-    // Convert image_path to full URLs with better error handling
-    const membersWithUrls = await Promise.all(
-      data.map(async (member: any) => {
-        try {
-          let imageUrl = member.image || ''
-          
-          // Only try to generate URL if we have an image_path
-          if (member.image_path) {
-            const generatedUrl = await getImageUrl(member.image_path)
-            if (generatedUrl) {
-              imageUrl = generatedUrl
-            } else {
-              console.warn(`Failed to generate URL for image_path: ${member.image_path}`)
-            }
-          }
-          
-          return {
-            ...member,
-            image: imageUrl
-          }
-        } catch (urlError) {
-          console.error(`Error processing image for member ${member.id}:`, urlError)
-          // Return member with original image field if URL generation fails
-          return member
-        }
+    // Extract all image paths that need URLs
+    const imagePaths = data
+      .filter((member: any) => member.image_path)
+      .map((member: any) => member.image_path)
+    
+    // Batch generate all URLs at once
+    let imageUrlMap: Record<string, string> = {}
+    if (imagePaths.length > 0) {
+      const urls = await getBatchImageUrls(imagePaths)
+      imagePaths.forEach((path: string, index: number) => {
+        if (path) imageUrlMap[path] = urls[index]
       })
-    )
+    }
+    
+    // Apply URLs to members
+    const membersWithUrls = data.map((member: any) => ({
+      ...member,
+      image: member.image_path ? (imageUrlMap[member.image_path] || member.image || '') : (member.image || '')
+    }))
     
     return membersWithUrls
   } catch (error) {
@@ -412,33 +423,25 @@ export const getProjectManagers = async () => {
     
     if (error) throw error
     
-    // Convert image_path to full URLs with better error handling
-    const membersWithUrls = await Promise.all(
-      data.map(async (member: any) => {
-        try {
-          let imageUrl = member.image || ''
-          
-          // Only try to generate URL if we have an image_path
-          if (member.image_path) {
-            const generatedUrl = await getImageUrl(member.image_path)
-            if (generatedUrl) {
-              imageUrl = generatedUrl
-            } else {
-              console.warn(`Failed to generate URL for image_path: ${member.image_path}`)
-            }
-          }
-          
-          return {
-            ...member,
-            image: imageUrl
-          }
-        } catch (urlError) {
-          console.error(`Error processing image for member ${member.id}:`, urlError)
-          // Return member with original image field if URL generation fails
-          return member
-        }
+    // Extract all image paths that need URLs
+    const imagePaths = data
+      .filter((member: any) => member.image_path)
+      .map((member: any) => member.image_path)
+    
+    // Batch generate all URLs at once
+    let imageUrlMap: Record<string, string> = {}
+    if (imagePaths.length > 0) {
+      const urls = await getBatchImageUrls(imagePaths)
+      imagePaths.forEach((path: string, index: number) => {
+        if (path) imageUrlMap[path] = urls[index]
       })
-    )
+    }
+    
+    // Apply URLs to members
+    const membersWithUrls = data.map((member: any) => ({
+      ...member,
+      image: member.image_path ? (imageUrlMap[member.image_path] || member.image || '') : (member.image || '')
+    }))
     
     return membersWithUrls
   } catch (error) {
@@ -458,33 +461,25 @@ export const getMembers = async () => {
     
     if (error) throw error
     
-    // Convert image_path to full URLs with better error handling
-    const membersWithUrls = await Promise.all(
-      data.map(async (member: any) => {
-        try {
-          let imageUrl = member.image || ''
-          
-          // Only try to generate URL if we have an image_path
-          if (member.image_path) {
-            const generatedUrl = await getImageUrl(member.image_path)
-            if (generatedUrl) {
-              imageUrl = generatedUrl
-            } else {
-              console.warn(`Failed to generate URL for image_path: ${member.image_path}`)
-            }
-          }
-          
-          return {
-            ...member,
-            image: imageUrl
-          }
-        } catch (urlError) {
-          console.error(`Error processing image for member ${member.id}:`, urlError)
-          // Return member with original image field if URL generation fails
-          return member
-        }
+    // Extract all image paths that need URLs
+    const imagePaths = data
+      .filter((member: any) => member.image_path)
+      .map((member: any) => member.image_path)
+    
+    // Batch generate all URLs at once
+    let imageUrlMap: Record<string, string> = {}
+    if (imagePaths.length > 0) {
+      const urls = await getBatchImageUrls(imagePaths)
+      imagePaths.forEach((path: string, index: number) => {
+        if (path) imageUrlMap[path] = urls[index]
       })
-    )
+    }
+    
+    // Apply URLs to members
+    const membersWithUrls = data.map((member: any) => ({
+      ...member,
+      image: member.image_path ? (imageUrlMap[member.image_path] || member.image || '') : (member.image || '')
+    }))
     
     return membersWithUrls
   } catch (error) {

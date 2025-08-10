@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { 
   getExecMembers, 
   getProjectManagers, 
@@ -17,6 +17,9 @@ import {
 } from '../../utils/supabase'
 import { ExecMember, ProjectManager, Member } from '../types/members'
 
+// Simple in-memory cache
+const memberCache = new Map<string, { data: any; timestamp: number }>()
+
 export const useMembers = () => {
   const [execMembers, setExecMembers] = useState<ExecMember[]>([])
   const [projectManagers, setProjectManagers] = useState<ProjectManager[]>([])
@@ -29,11 +32,28 @@ export const useMembers = () => {
       setLoading(true)
       setError(null)
       
+      // Check cache first (5 minute cache)
+      const cacheKey = 'all-members'
+      const cached = memberCache.get(cacheKey)
+      if (cached && Date.now() - cached.timestamp < 5 * 60 * 1000) {
+        setExecMembers(cached.data.exec)
+        setProjectManagers(cached.data.pm)
+        setMembers(cached.data.mem)
+        setLoading(false)
+        return
+      }
+      
       const [exec, pm, mem] = await Promise.all([
         getExecMembers(),
         getProjectManagers(),
         getMembers()
       ])
+      
+      // Cache the results
+      memberCache.set(cacheKey, {
+        data: { exec, pm, mem },
+        timestamp: Date.now()
+      })
       
       setExecMembers(exec)
       setProjectManagers(pm)
@@ -49,6 +69,11 @@ export const useMembers = () => {
   useEffect(() => {
     loadAllMembers()
   }, [])
+
+  // Memoized results for better performance
+  const memoizedExec = useMemo(() => execMembers, [execMembers])
+  const memoizedPM = useMemo(() => projectManagers, [projectManagers])
+  const memoizedMembers = useMemo(() => members, [members])
 
   const addExecMember = async (member: Omit<ExecMember, 'id' | 'created_at' | 'updated_at'>) => {
     try {
@@ -147,9 +172,9 @@ export const useMembers = () => {
   }
 
   return {
-    execMembers,
-    projectManagers,
-    members,
+    execMembers: memoizedExec,
+    projectManagers: memoizedPM,
+    members: memoizedMembers,
     loading,
     error,
     loadAllMembers,
@@ -161,6 +186,7 @@ export const useMembers = () => {
     updateMemberById,
     removeExecMember,
     removeProjectManager,
-    removeMember
+    removeMember,
+    clearCache: () => memberCache.clear()
   }
 }
