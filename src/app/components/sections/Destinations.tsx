@@ -1,40 +1,10 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
+import { useSectionAnimation } from '../../hooks/useIntersectionObserver'
 
 export default function Destinations() {
-  const [isVisible, setIsVisible] = useState(false)
-  const [logosVisible, setLogosVisible] = useState(false)
-  const sectionRef = useRef<HTMLElement>(null)
-  const logosRef = useRef<HTMLDivElement>(null)
-
-  // Intersection Observer for section animations
-  useEffect(() => {
-    const sectionObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true)
-        }
-      },
-      { threshold: 0.3 }
-    )
-
-    const logosObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setLogosVisible(true)
-        }
-      },
-      { threshold: 0.2 }
-    )
-
-    if (sectionRef.current) sectionObserver.observe(sectionRef.current)
-    if (logosRef.current) logosObserver.observe(logosRef.current)
-
-    return () => {
-      sectionObserver.disconnect()
-      logosObserver.disconnect()
-    }
-  }, [])
+  const { isVisible, elementRef: sectionRef } = useSectionAnimation<HTMLElement>()
+  const { isVisible: logosVisible, elementRef: logosRef } = useSectionAnimation<HTMLDivElement>({ threshold: 0.2 })
 
   return (
     <section ref={sectionRef} className="w-full bg-gradient-to-b from-white to-blue-100 py-16">

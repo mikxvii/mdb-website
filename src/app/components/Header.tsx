@@ -20,10 +20,10 @@ export default function Header() {
 
   const handleClick = (itemKey: string) => {
     setClickedItem(itemKey)
-    // Force immediate update for smooth click transitions
-    setTimeout(() => {
+    // Use requestAnimationFrame for smoother updates
+    requestAnimationFrame(() => {
       updateBubblePositionImmediate(itemKey)
-    }, 0)
+    })
   }
 
   const updateBubblePositionImmediate = (itemKey: string) => {
@@ -75,22 +75,13 @@ export default function Header() {
       return false
     }
 
-    // Try immediately first
+    // Try immediately first, then with a single delay if needed
     if (!attemptUpdate()) {
-      // Then try with multiple attempts for better reliability
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         if (!attemptUpdate()) {
-          setTimeout(() => {
-            if (!attemptUpdate()) {
-              setTimeout(() => {
-                if (!attemptUpdate()) {
-                  setTimeout(attemptUpdate, 100)
-                }
-              }, 50)
-            }
-          }, 50)
+          setTimeout(attemptUpdate, 100)
         }
-      }, 10)
+      })
     }
   }
 

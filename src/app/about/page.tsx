@@ -1,9 +1,9 @@
-import AboutUs from '../components/sections/AboutUs'
-import AboutCarousel from '../components/sections/AboutCarousel'
-import Exec from '../components/sections/Exec'
-import ProjectManagers from '../components/sections/ProjectManagers'
-import Members from '../components/sections/Members'
-import Carousel from '../components/sections/Carousel'
+import AboutUs from './components/AboutUs'
+import AboutCarousel from './components/AboutCarousel'
+import Exec from './components/Exec'
+import ProjectManagers from './components/ProjectManagers'
+import Members from './components/Members'
+import Carousel from '../components/Carousel'
 
 export default function About() {
   return (

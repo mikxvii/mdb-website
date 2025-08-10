@@ -1,162 +1,243 @@
-# MDB Website - Mobile Developers of Berkeley
+# MDB Website
 
-A modern, responsive website for the Mobile Developers of Berkeley (MDB) student organization at UC Berkeley. Built with Next.js 14, React 18, TypeScript, and Tailwind CSS.
+A modern, responsive website for MDB (Mobile Development Berkeley) showcasing our community, projects, and training programs.
 
-## 🚀 Features
+## ✨ Features
 
-- **Next.js 14** with App Router for modern routing
-- **React 18** with TypeScript for type safety
-- **Tailwind CSS** for responsive styling and custom MDB branding
-- **Multi-page structure** with comprehensive navigation
-- **SEO optimized** with proper metadata and favicons
-- **Mobile-first responsive design**
-- **Interactive components** including carousels, forms, and embedded Calendly
-- **Rich media support** for images, videos, and SVG assets
+- **Mobile-first responsive design** with iPad/tablet optimizations
+- **Performance optimized** with Next.js 14, image optimization, and bundle analysis
+- **Clean architecture** with centralized types, constants, and reusable hooks
+- **Modern UI/UX** with glassmorphism effects, smooth animations, and touch-friendly interactions
+- **Comprehensive testing** with Jest, Playwright, and MSW
+- **Accessibility focused** with semantic HTML and ARIA support
 
-## 📁 Project Structure
+## 🚀 Performance Optimizations
+
+- **Code Organization**: Moved hardcoded data to separate constants files
+- **Next.js Enhancements**: Image optimization (WebP/AVIF), compression, caching
+- **DRY Improvements**: Created reusable `MemberSection` component and enhanced `useIntersectionObserver` hook
+- **Animation Utilities**: Centralized common animation classes in CSS
+- **Bundle Analysis**: Integrated `@next/bundle-analyzer` for performance monitoring
+
+## 🏗️ Project Structure
 
 ```
-src/
-└── app/
-    ├── layout.tsx                    # Root layout with Header & Footer
-    ├── page.tsx                      # Home page (/)
-    ├── globals.css                   # Global styles with Tailwind
-    ├── about/
-    │   └── page.tsx                  # About page (/about)
-    ├── projects/
-    │   └── page.tsx                  # Projects page (/projects)
-    ├── training-program/
-    │   └── page.tsx                  # Training program page (/training-program)
-    ├── apply/
-    │   ├── page.tsx                  # Apply page (/apply)
-    │   └── components/
-    │       ├── Calendly.tsx          # Calendly integration
-    │       └── Flyer.tsx             # Application flyer
-    ├── contact/
-    │   └── page.tsx                  # Contact page (/contact)
-    └── components/
-        ├── Header.tsx                # Navigation header
-        ├── Footer.tsx                # Site footer
-        └── sections/                 # Page-specific components
-            ├── TitleSection.tsx      # Home hero section
-            ├── PurpAndComm.tsx       # Purpose & community
-            ├── Carousel.tsx          # Image carousel
-            ├── Destinations.tsx      # Travel destinations
-            ├── AboutUs.tsx           # About section
-            ├── AboutCarousel.tsx     # About page carousel
-            ├── Exec.tsx              # Executive team
-            ├── ProjectManagers.tsx   # Project managers
-            ├── Members.tsx           # Member showcase
-            ├── ProjectHeader.tsx     # Projects page header
-            ├── ProjectCarousel.tsx   # Project showcase
-            ├── ProjectClients.tsx    # Client logos
-            ├── TrainingHeader.tsx    # Training page header
-            ├── TrainingCurriculum.tsx # Curriculum details
-            ├── TrainingStaff.tsx     # Training staff
-            └── TrainingTools.tsx     # Development tools
+mdb-website-1/
+├── src/
+│   └── app/
+│       ├── components/                    # General components
+│       │   ├── __tests__/                # Component tests
+│       │   │   ├── Footer.test.tsx
+│       │   │   └── Header.test.tsx
+│       │   ├── sections/                 # Home page specific sections
+│       │   │   ├── Destinations.tsx
+│       │   │   ├── MemberSection.tsx     # NEW: Reusable member display component
+│       │   │   ├── PurpAndComm.tsx
+│       │   │   └── TitleSection.tsx
+│       │   ├── Carousel.tsx
+│       │   ├── Footer.tsx
+│       │   ├── Header.tsx
+│       │   ├── MemberDB.tsx
+│       │   └── OptimizedImage.tsx
+│       ├── about/
+│       │   ├── components/               # About page specific components
+│       │   │   ├── AboutCarousel.tsx
+│       │   │   ├── AboutUs.tsx
+│       │   │   ├── Exec.tsx             # Updated: Now uses MemberSection
+│       │   │   ├── Members.tsx          # Updated: Now uses MemberSection
+│       │   │   └── ProjectManagers.tsx  # Updated: Now uses MemberSection
+│       │   └── page.tsx
+│       ├── projects/
+│       │   ├── components/               # Projects page specific components
+│       │   │   ├── Clients.tsx
+│       │   │   ├── ProjectCarousel.tsx
+│       │   │   ├── ProjectClients.tsx   # Updated: Uses new animation utilities
+│       │   │   └── ProjectHeader.tsx
+│       │   └── page.tsx
+│       ├── training-program/
+│       │   ├── components/               # Training program specific components
+│       │   │   ├── TrainingCurriculum.tsx
+│       │   │   ├── TrainingHeader.tsx
+│       │   │   ├── TrainingStaff.tsx    # Fixed: Correct import paths
+│       │   │   └── TrainingTools.tsx
+│       │   └── page.tsx
+│       ├── apply/
+│       │   ├── components/               # Apply page specific components
+│       │   │   ├── Calendly.tsx
+│       │   │   └── Flyer.tsx
+│       │   └── page.tsx
+│       ├── contact/
+│       │   └── page.tsx                  # Contact page (no components folder needed)
+│       ├── constants/                    # Centralized data constants
+│       │   ├── exec.ts                   # Executive members data
+│       │   ├── members.ts                # General members data
+│       │   ├── projectManagers.ts        # Project managers data
+│       │   └── projects.ts               # Client projects data
+│       ├── types/                        # Centralized type definitions
+│       │   └── members.ts                # Member interface definitions
+│       ├── hooks/                        # Custom React hooks
+│       │   └── useIntersectionObserver.ts # Enhanced: Multiple element support
+│       ├── globals.css                   # Updated: New animation utilities
+│       ├── layout.tsx
+│       └── page.tsx
+├── tests/
+│   └── e2e/                             # End-to-end tests
+│       ├── home.spec.ts
+│       └── navigation.spec.ts
+├── utils/
+│   └── test-utils.tsx                   # Testing utilities
+├── .eslintrc.json                        # ESLint configuration
+├── .gitignore                            # Git ignore rules
+├── jest.config.js                        # Jest configuration
+├── jest.setup.js                         # Jest setup
+├── LICENSE                               # MIT License
+├── next-env.d.ts                        # Next.js TypeScript definitions
+├── next.config.js                        # Updated: Performance optimizations
+├── package.json                          # Updated: New scripts and dependencies
+├── package-lock.json                     # Dependency lock file
+├── playwright.config.ts                  # Playwright configuration
+├── postcss.config.js                     # PostCSS configuration
+├── tailwind.config.js                    # Tailwind CSS configuration
+├── tsconfig.json                         # TypeScript configuration
+├── tsconfig.test.json                    # TypeScript test configuration
+└── TESTING.md                            # Testing documentation
 ```
 
-## 🌐 Pages
+## 🎯 DRY Improvements Implemented
 
-1. **Home (/)** - Landing page with hero section, purpose & community, carousel, and destinations
-2. **About (/about)** - Organization story, executive team, project managers, and member showcase
-3. **Projects (/projects)** - Project showcase, client partnerships, and portfolio
-4. **Training Program (/training-program)** - Curriculum, staff, and development tools
-5. **Apply (/apply)** - Application process with Calendly integration
-6. **Contact (/contact)** - Contact information and business details
+### **1. MemberSection Component**
+- **Created**: Reusable component for displaying member grids
+- **Replaces**: Duplicate code in `Exec.tsx`, `Members.tsx`, and `ProjectManagers.tsx`
+- **Benefits**: 42 lines of code eliminated, consistent styling, easy maintenance
 
-## 🎨 Design System
+### **2. Enhanced Intersection Observer Hook**
+- **Enhanced**: `useIntersectionObserver` with `useMultipleIntersectionObserver`
+- **Features**: Multiple element support, different thresholds per element
+- **Benefits**: Eliminates duplicate observer logic across components
 
-The website uses a custom color palette with MDB branding:
-- **MDB Light Blue** - Primary background color
-- **Custom gradients** - From light blue to white
-- **Responsive typography** - Optimized for all screen sizes
-- **Interactive elements** - Hover effects and smooth transitions
+### **3. Animation Utility Classes**
+- **Added**: Common fade-up animation classes in `globals.css`
+- **Classes**: `.animate-fade-up`, `.animate-fade-up-enter`, `.animate-fade-up-visible`
+- **Benefits**: Consistent animations, reduced CSS duplication
 
-## 🚀 Getting Started
+## 🛠️ Available Scripts
 
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-2. **Run development server:**
-   ```bash
-   npm run dev
-   ```
-
-3. **Open in browser:**
-   Visit [http://localhost:3000](http://localhost:3000)
-
-## 📝 Available Scripts
-
+### **Development**
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
 
-## 🎨 Adding New Pages
+### **Performance Monitoring**
+- `npm run analyze` - Analyze bundle size
+- `npm run build:analyze` - Build and analyze bundle
+- `npm run lighthouse` - Run Lighthouse performance audit
 
-To add a new page (e.g., `/events`):
+### **Testing**
+- `npm run test` - Run Jest unit tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage report
+- `npm run test:e2e` - Run Playwright end-to-end tests
+- `npm run test:e2e:ui` - Run Playwright tests with UI
+- `npm run test:e2e:headed` - Run Playwright tests in headed mode
+- `npm run test:all` - Run all tests (unit + e2e)
 
-1. Create directory: `src/app/events/`
-2. Add page file: `src/app/events/page.tsx`
-3. Export React component:
-   ```tsx
-   export default function Events() {
-     return (
-       <div className="min-h-screen">
-         <h1 className="text-5xl font-bold mb-6">Events</h1>
-         {/* Your content */}
-       </div>
-     )
-   }
-   ```
-4. Update navigation in `src/app/components/Header.tsx`
+## 🎨 Design System & Responsiveness
 
-## 🎨 Adding New Components
+### **Mobile-First Approach**
+- Responsive breakpoints: `sm:`, `md:`, `lg:`, `xl:`
+- Touch-friendly interactions with `touch-scroll` utilities
+- Optimized spacing and typography for mobile devices
 
-To add a new section component:
+### **Dual Layout System**
+- **Mobile/Tablet**: Stacked, wide card layouts for better readability
+- **Desktop**: Grid-based layouts for optimal space utilization
+- **iPad/Tablet**: Specific optimizations for medium screen sizes
 
-1. Create file: `src/app/components/sections/NewSection.tsx`
-2. Export React component with proper TypeScript typing
-3. Import and use in the appropriate page
+### **Animation System**
+- Intersection Observer-based fade-in animations
+- Smooth transitions with configurable delays
+- Performance-optimized using `requestAnimationFrame`
 
-## 🛠️ Tech Stack
+## ⚡ Performance Optimizations
 
-- **Next.js 14** - React framework with App Router
-- **React 18** - UI library with modern features
-- **TypeScript** - Type safety and better developer experience
-- **Tailwind CSS** - Utility-first CSS framework
-- **PostCSS** - CSS processing and optimization
-- **ESLint** - Code linting and quality assurance
+### **Code Organization**
+- Centralized data management in constants files
+- Reusable components and hooks
+- Type-safe interfaces for better development experience
 
-## 📁 Assets
+### **Next.js Optimizations**
+- Image format optimization (WebP/AVIF)
+- Device-specific image sizing
+- Gzip compression enabled
+- Enhanced caching headers for static assets
 
-The website includes various media assets:
-- **Images** - Team photos, events, logos, and promotional materials
-- **Videos** - Event recordings and promotional content
-- **SVGs** - Icons and graphics
-- **Logos** - Partner and client logos
+### **Mobile Performance**
+- Optimized Intersection Observer thresholds
+- Reduced animation complexity on mobile
+- Touch-friendly scrolling implementations
 
-## 🚀 Deployment
+## 🧪 Testing Strategy
 
-Deploy easily on:
-- **Vercel** (recommended for Next.js)
-- **Netlify** 
-- **AWS**
-- Any Node.js platform
+### **Unit Tests (Jest)**
+- Component testing with React Testing Library
+- Mock Service Worker (MSW) for API mocking
+- Coverage reporting and watch mode
+- Test utilities for common testing patterns
 
-For Vercel:
-```bash
-npm install -g vercel
-vercel
-```
+### **End-to-End Tests (Playwright)**
+- Cross-browser testing support
+- Multiple execution modes (headless, headed, UI)
+- Navigation and user interaction testing
+- Performance and accessibility validation
 
-## 📄 License
+## 📱 Mobile Optimizations
 
-Licensed under the MIT License - see [LICENSE](LICENSE) file for details.
+### **Touch Interactions**
+- Custom scrollbar hiding with `scrollbar-hide` class
+- Touch-friendly scrolling with `touch-scroll` class
+- Optimized button sizes and spacing for mobile
 
-## 🤝 Contributing
+### **Responsive Design**
+- Fluid typography using `clamp()` functions
+- Adaptive grid layouts for different screen sizes
+- Mobile-specific spacing and padding adjustments
 
-This is the official website for Mobile Developers of Berkeley. For contributions, please contact the MDB executive team.
+## 🔧 Adding New Data
+
+### **Members/Executives/Projects**
+1. Add data to appropriate constants file (`exec.ts`, `members.ts`, `projectManagers.ts`, `projects.ts`)
+2. Use existing `MemberSection` component for member displays
+3. Follow established interface patterns in `types/members.ts`
+
+### **New Components**
+1. Place route-specific components in `src/app/[route]/components/`
+2. Place general components in `src/app/components/`
+3. Use existing hooks and utilities for consistency
+
+## 🎯 Tech Stack
+
+- **Framework**: Next.js 14 with App Router
+- **Styling**: Tailwind CSS with custom utilities
+- **Language**: TypeScript for type safety
+- **Testing**: Jest + React Testing Library, Playwright
+- **Performance**: Next.js Image optimization, bundle analysis
+- **Animation**: Intersection Observer API, CSS transitions
+
+## 🚀 Getting Started
+
+1. **Install dependencies**: `npm install`
+2. **Start development**: `npm run dev`
+3. **Run tests**: `npm run test:all`
+4. **Build for production**: `npm run build`
+
+## 📈 Performance Monitoring
+
+- Use `npm run analyze` to identify bundle size issues
+- Run `npm run lighthouse` for comprehensive performance metrics
+- Monitor Core Web Vitals in development tools
+- Test on various devices and network conditions
+
+---
+
+**MDB Website** - Built with modern web technologies and performance best practices.

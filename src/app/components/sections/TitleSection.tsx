@@ -1,56 +1,14 @@
 'use client'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState, useEffect, useMemo } from 'react'
+import { useTypingAnimation } from '../../hooks/useTypingAnimation'
+import { useAnimationLoad } from '../../hooks/useAnimationLoad'
 
 export default function TitleSection() {
-  const [isLoaded, setIsLoaded] = useState(false)
-  const [currentWordIndex, setCurrentWordIndex] = useState(0)
-  const [currentText, setCurrentText] = useState('')
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [typeSpeed, setTypeSpeed] = useState(100)
-
-  const words = useMemo(() => ['MDB.', 'a Community.', 'Chillers.', 'a Network.', 'Tight-knit.', 'Diverse.', 'Creators.', 'MDBesties.', 'Developers.', 'Brainrotted.', 'Family.'], [])
-
-  useEffect(() => {
-    // Trigger animation on next frame to prevent flash
-    const timer = requestAnimationFrame(() => {
-      setIsLoaded(true)
-    })
-    
-    return () => cancelAnimationFrame(timer)
-  }, [])
-
-  useEffect(() => {
-    const currentWord = words[currentWordIndex]
-    
-    const handleType = () => {
-      if (isDeleting) {
-        // Backspace effect
-        setCurrentText(currentWord.substring(0, currentText.length - 1))
-        setTypeSpeed(50) // Faster deletion
-        
-        if (currentText === '') {
-          setIsDeleting(false)
-          setCurrentWordIndex((prev) => (prev + 1) % words.length)
-          setTypeSpeed(100) // Normal typing speed
-        }
-      } else {
-        // Typing effect
-        setCurrentText(currentWord.substring(0, currentText.length + 1))
-        setTypeSpeed(100)
-        
-        if (currentText === currentWord) {
-          // Pause before starting to delete
-          setTimeout(() => setIsDeleting(true), 2000)
-          return
-        }
-      }
-    }
-
-    const timer = setTimeout(handleType, typeSpeed)
-    return () => clearTimeout(timer)
-  }, [currentText, isDeleting, currentWordIndex, typeSpeed, words])
+  const { isLoaded } = useAnimationLoad()
+  
+  const words = ['MDB.', 'a Community.', 'Chillers.', 'a Network.', 'Tight-knit.', 'Diverse.', 'Creators.', 'MDBesties.', 'Developers.', 'Brainrotted.', 'Family.']
+  const { currentText } = useTypingAnimation({ words })
 
   return (
     <section className="min-h-screen w-screen bg-gradient-to-b from-mdb-light-blue to-white flex items-center -mt-20 relative mb-0 py-8 md:py-12 lg:py-16">
@@ -109,7 +67,7 @@ export default function TitleSection() {
               {/* Contact Button */}
               <Link 
                 href="/contact"
-                className="border-2 border-mdb-blue text-mdb-blue bg-white/80 backdrop-blur-sm px-6 md:px-8 py-3 md:py-3 rounded-xl font-semibold text-[clamp(0.6875rem,1.75vw,0.875rem)] hover:bg-mdb-blue hover:text-white hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-lg origin-center min-w-[120px] md:min-w-[140px]"
+                className="border-2 border-mdb-blue text-mdb-blue bg-white/80 backdrop-blur-sm px-6 md:px-8 py-3 md:py-3 rounded-xl font-semibold text-[clamp(0.6875rem,2.2vw,1.05rem)] hover:bg-mdb-blue hover:text-white hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-lg origin-center min-w-[120px] md:min-w-[140px]"
               >
                 Contact Us
               </Link>

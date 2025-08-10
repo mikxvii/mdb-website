@@ -1,6 +1,6 @@
-import ProjectHeader from '../components/sections/ProjectHeader'
-import ProjectCarousel from '../components/sections/ProjectCarousel'
-import ProjectClients from '../components/sections/ProjectClients'
+import ProjectHeader from './components/ProjectHeader'
+import ProjectCarousel from './components/ProjectCarousel'
+import ProjectClients from './components/ProjectClients'
 
 export default function Projects() {
   return (

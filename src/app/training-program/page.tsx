@@ -1,7 +1,7 @@
-import TrainingHeader from '../components/sections/TrainingHeader'
-import TrainingCurriculum from '../components/sections/TrainingCurriculum'
-import TrainingStaff from '../components/sections/TrainingStaff'
-import TrainingTools from '../components/sections/TrainingTools'
+import TrainingHeader from './components/TrainingHeader'
+import TrainingCurriculum from './components/TrainingCurriculum'
+import TrainingStaff from './components/TrainingStaff'
+import TrainingTools from './components/TrainingTools'
 
 export default function TrainingProgram() {
   return (
