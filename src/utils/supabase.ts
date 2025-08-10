@@ -981,3 +981,40 @@ export const submitContactForm = async (formData: {
     throw error
   }
 }
+
+// Contact submissions management
+export const getContactSubmissions = async () => {
+  try {
+    const supabase = await getSupabaseClient()
+    
+    const { data, error } = await supabase
+      .from('contact_submissions')
+      .select('*')
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    
+    return data || []
+  } catch (error) {
+    console.error('Failed to fetch contact submissions:', error)
+    throw error
+  }
+}
+
+export const deleteContactSubmission = async (id: string) => {
+  try {
+    const supabase = await getSupabaseClient()
+    
+    const { error } = await supabase
+      .from('contact_submissions')
+      .delete()
+      .eq('id', id)
+    
+    if (error) throw error
+    
+    return true
+  } catch (error) {
+    console.error('Failed to delete contact submission:', error)
+    throw error
+  }
+}

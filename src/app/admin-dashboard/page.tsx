@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
-import { uploadImage, getImageUrl, deleteImage, listAllImages, getBatchImageUrls, safeDeleteOldImage, validateImageAccess, getSupabaseClient } from '../../utils/supabase'
+import { uploadImage, getImageUrl, deleteImage, listAllImages, getBatchImageUrls, safeDeleteOldImage, validateImageAccess, getSupabaseClient, getContactSubmissions, deleteContactSubmission } from '../../utils/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { useMembers } from '../hooks/useMembers'
@@ -21,11 +21,13 @@ export default function AdminDashboardPage() {
   const [successMessage, setSuccessMessage] = useState<string>('')
   const [imageCache, setImageCache] = useState<Map<string, string>>(new Map())
   const [carouselImageCache, setCarouselImageCache] = useState<Map<string, string>>(new Map())
-  const [activeTab, setActiveTab] = useState<'images' | 'members' | 'carousel'>('images')
+  const [activeTab, setActiveTab] = useState<'images' | 'members' | 'carousel' | 'submissions'>('images')
   const [showAddMember, setShowAddMember] = useState(false)
   const [editingMember, setEditingMember] = useState<{type: 'exec' | 'pm' | 'member', member: any} | null>(null)
   const [showAddCarouselItem, setShowAddCarouselItem] = useState(false)
   const [editingCarouselItem, setEditingCarouselItem] = useState<{ type: 'carousel', item: CarouselItem } | null>(null)
+  const [submissions, setSubmissions] = useState<any[]>([])
+  const [submissionsLoading, setSubmissionsLoading] = useState(false)
   const { user, loading: authLoading, isAuthenticated } = useAuth()
   const router = useRouter()
   const { 
@@ -53,6 +55,21 @@ export default function AdminDashboardPage() {
     removeCarouselItem,
     getItemsByStrip
   } = useCarousel()
+
+  const loadSubmissions = useCallback(async () => {
+    try {
+      setSubmissionsLoading(true)
+      setError('')
+      
+      const data = await getContactSubmissions()
+      setSubmissions(data)
+    } catch (error) {
+      console.error('Failed to load submissions:', error)
+      setError(`Failed to load submissions: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } finally {
+      setSubmissionsLoading(false)
+    }
+  }, [])
 
   const loadCarouselImages = useCallback(async () => {
     try {
@@ -114,6 +131,7 @@ export default function AdminDashboardPage() {
     if (!authLoading && isAuthenticated) {
       loadExistingImages(false) // Don't show performance metrics on initial load
       loadCarouselItems() // Load carousel items
+      loadSubmissions() // Load contact submissions
     }
   }, [isAuthenticated, authLoading, router])
 
@@ -496,6 +514,19 @@ export default function AdminDashboardPage() {
     }
   }
 
+  const handleDeleteSubmission = async (id: string) => {
+    try {
+      await deleteContactSubmission(id)
+      setSuccessMessage('Successfully deleted submission')
+      setTimeout(() => setSuccessMessage(''), 3000)
+      
+      // Refresh submissions
+      await loadSubmissions()
+    } catch (error) {
+      setError(`Failed to delete submission: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
   // Show loading state while checking authentication
   if (authLoading) {
     return (
@@ -568,6 +599,16 @@ export default function AdminDashboardPage() {
               }`}
             >
               Carousel Management
+            </button>
+            <button
+              onClick={() => setActiveTab('submissions')}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'submissions'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Contact Submissions
             </button>
           </div>
         </div>
@@ -1070,6 +1111,68 @@ export default function AdminDashboardPage() {
           </>
         )}
 
+        {/* Submissions Management Tab */}
+        {activeTab === 'submissions' && (
+          <>
+            <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Contact Submissions</h2>
+                <div className="flex gap-2">
+                  <button
+                    onClick={loadSubmissions}
+                    disabled={submissionsLoading}
+                    className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors disabled:opacity-50"
+                  >
+                    {submissionsLoading ? 'Loading...' : 'Refresh'}
+                  </button>
+                </div>
+              </div>
+
+              {submissionsLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-mdb-blue mx-auto mb-2"></div>
+                  <p className="text-gray-600">Loading submissions...</p>
+                </div>
+              ) : submissions.length > 0 ? (
+                <div className="space-y-4">
+                  {submissions.map((submission) => (
+                    <div key={submission.id} className="bg-gray-50 rounded-lg p-4 border">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-4 mb-2">
+                            <h4 className="font-semibold text-gray-900">{submission.name}</h4>
+                            <span className="text-sm text-gray-500">{submission.email}</span>
+                            <span className="text-xs text-gray-400">{new Date(submission.created_at).toLocaleDateString()}</span>
+                          </div>
+                          <h5 className="font-medium text-gray-800 mb-2">{submission.subject}</h5>
+                          <p className="text-gray-700 text-sm whitespace-pre-wrap">{submission.message}</p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteSubmission(submission.id)}
+                          className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors ml-4"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="mb-4">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                      <path d="M8 14v20c0 4.418 3.582 8 8 8h16c4.418 0 8-3.582 8-8V14c0-4.418-3.582-8-8-8H16c-4.418 0-8 3.582-8 8z" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M20 22h8M20 26h8M20 30h8M16 22h.01M16 26h.01M16 30h.01" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No submissions yet</h3>
+                  <p className="text-gray-500">Contact form submissions will appear here</p>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
         {/* Status Check */}
         <div className="border rounded-lg p-4 bg-gray-50">
           <h2 className="text-xl font-semibold mb-4">System Status</h2>
@@ -1105,6 +1208,10 @@ export default function AdminDashboardPage() {
             <div className="flex items-center">
               <span className="w-3 h-3 bg-pink-500 rounded-full mr-2"></span>
               <span className="text-sm">Carousel Cache: {carouselImageCache.size} URLs</span>
+            </div>
+            <div className="flex items-center">
+              <span className="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
+              <span className="text-sm">{submissions.length} Contact Submissions</span>
             </div>
           </div>
         </div>
