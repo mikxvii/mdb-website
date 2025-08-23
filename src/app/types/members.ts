@@ -14,6 +14,7 @@ export interface ExecMember extends BaseMember {
 
 export interface Member extends BaseMember {
   // General member properties can be added here
+  calendly?: string
 }
 
 export interface ProjectManager extends BaseMember {
