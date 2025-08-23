@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
-import { DEFAULT_CAROUSEL_ITEMS } from '../constants/carousel'
+import { CAROUSEL_ITEMS } from '../constants/carousel'
 import { CarouselItem } from '../types/members'
 
 export const useCarousel = () => {
   // Memoized results for better performance
-  const memoizedCarouselItems = useMemo(() => DEFAULT_CAROUSEL_ITEMS, [])
+  const memoizedCarouselItems = useMemo(() => CAROUSEL_ITEMS, [])
 
   // Get items by strip
   const getItemsByStrip = (strip: number) => {

@@ -1,7 +1,7 @@
 'use client'
 import { useRef, useEffect } from 'react'
+import Image from 'next/image'
 import { useTypingAnimation } from '../hooks/useTypingAnimation'
-import { useAnimationPreferences } from '../hooks/useAnimationPreferences'
 
 export default function Carousel() {
   const carouselRef = useRef<HTMLDivElement>(null)
@@ -16,7 +16,7 @@ export default function Carousel() {
     loop: true
   })
 
-  const { shouldReduceAnimations } = useAnimationPreferences()
+
 
   // First carousel media and captions (top strip) - mixed images and videos
   const media1 = [
@@ -119,8 +119,9 @@ export default function Carousel() {
 
     let animationId: number
     let lastTime = 0
-    // Reduce animation speed on mobile for better performance
-    const speed = shouldReduceAnimations ? 30 : 60 // pixels per second
+    
+  // Enable carousel animation on all devices, same speed for mobile and desktop
+  const speed = 60 // Consistent speed across all devices
     const imageWidth = 432 // 400px width + 32px margin (mx-4 = 16px each side)
     
     // Use the same cycle length for all carousels to keep them synchronized
@@ -165,17 +166,15 @@ export default function Carousel() {
       animationId = requestAnimationFrame(animate)
     }
 
-    // Only start animation if animations are not reduced
-    if (!shouldReduceAnimations) {
-      animationId = requestAnimationFrame(animate)
-    }
+    // Always start carousel animation (enabled on all devices)
+    animationId = requestAnimationFrame(animate)
 
     return () => {
       if (animationId) {
         cancelAnimationFrame(animationId)
       }
     }
-  }, [media1.length, media2.length, media3.length, shouldReduceAnimations])
+  }, [media1.length, media2.length, media3.length])
 
   return (
     <section className="w-screen bg-gradient-to-b from-mdb-light-blue to-white py-8 sm:py-12 md:py-16 relative left-1/2 -translate-x-1/2 overflow-hidden">
@@ -183,7 +182,7 @@ export default function Carousel() {
       <div className="mb-8 sm:mb-12 md:mb-16 relative z-10">
         <h2 className="text-5xl font-raleway-bold text-center text-mdb-blue">
           MD{currentText}
-          <span className={`${shouldReduceAnimations ? 'animate-pulse-slow' : 'animate-pulse'} text-mdb-blue`}>|</span>
+          <span className="animate-pulse text-mdb-blue">|</span>
         </h2>
       </div>
       
@@ -202,14 +201,12 @@ export default function Carousel() {
             {duplicatedMedia1.map((mediaItem: any, index: number) => (
               <div 
                 key={index} 
-                className={`group flex-shrink-0 w-[280px] sm:w-[320px] md:w-[360px] lg:w-[400px] relative mx-2 sm:mx-3 md:mx-4 transition-all transform origin-center mt-6 ${
-                  shouldReduceAnimations 
-                    ? 'hover:scale-105 hover:translate-x-0.5 duration-200 hover:drop-shadow-md' 
-                    : 'hover:scale-110 hover:translate-x-1 duration-300 hover:drop-shadow-xl'
-                }`}
+                className="group flex-shrink-0 w-[280px] sm:w-[320px] md:w-[360px] lg:w-[400px] relative mx-2 sm:mx-3 md:mx-4 mt-6
+                  lg:transition-all lg:transform lg:origin-center lg:duration-200
+                  lg:hover:scale-105 lg:hover:translate-x-0.5 lg:hover:drop-shadow-md"
               >
                 {/* Media container */}
-                <div className="relative w-full h-[200px] sm:h-[220px] md:h-[250px] lg:h-[300px]">
+                <div className="relative lg:w-full h-[200px] sm:h-[220px] md:h-[250px] lg:h-[250px]">
                   {mediaItem.type === 'video' ? (
                     <video
                       src={mediaItem.src}
@@ -240,10 +237,12 @@ export default function Carousel() {
                       }}
                     />
                   ) : (
-                    <img
+                    <Image
                       src={mediaItem.src}
                       alt={`MDB Community Photo ${index + 1}`}
                       className="w-full h-full object-cover rounded-2xl"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
                       onError={(e) => {
                         console.error('Image failed to load:', mediaItem.src, e)
                         const imgElement = e.target as HTMLImageElement
@@ -263,11 +262,7 @@ export default function Carousel() {
                   )}
                 </div>
                 {/* Caption card - slides out from underneath */}
-                <div className={`absolute top-[171px] sm:top-[191px] md:top-[221px] lg:top-[271px] left-0 right-0 bg-mdb-blue text-white text-sm px-4 py-3 rounded-b-2xl shadow-lg transform -translate-y-4 opacity-0 group-hover:translate-y-4 group-hover:opacity-100 z-10 text-center ${
-                  shouldReduceAnimations 
-                    ? 'transition-all duration-200 ease-out' 
-                    : 'transition-all duration-300 ease-out'
-                }`}>
+                <div className="absolute top-[171px] sm:top-[191px] md:top-[221px] lg:top-[220px] left-0 right-0 bg-mdb-blue text-white text-sm px-4 py-3 rounded-b-2xl shadow-lg transform -translate-y-4 opacity-0 group-hover:translate-y-4 group-hover:opacity-100 z-10 text-center transition-all duration-200 ease-out">
                   {duplicatedCaptions1[index]}
                 </div>
               </div>
@@ -286,14 +281,10 @@ export default function Carousel() {
             {duplicatedMedia2.map((mediaItem: any, index: number) => (
               <div 
                 key={`second-${index}`} 
-                className={`group flex-shrink-0 w-[280px] sm:w-[320px] md:w-[360px] lg:w-[400px] relative mx-2 sm:mx-3 md:mx-4 transition-all transform origin-center mt-6 ${
-                  shouldReduceAnimations 
-                    ? 'hover:scale-105 hover:translate-x-0.5 duration-200 hover:drop-shadow-md' 
-                    : 'hover:scale-110 hover:translate-x-1 duration-300 hover:drop-shadow-xl'
-                }`}
+                className="group flex-shrink-0 w-[280px] sm:w-[320px] md:w-[360px] lg:w-[400px] relative mx-2 sm:mx-3 md:mx-4 transition-all transform origin-center mt-6 hover:scale-105 hover:translate-x-0.5 duration-200 hover:drop-shadow-md"
               >
                 {/* Media container */}
-                <div className="relative w-full h-[200px] sm:h-[220px] md:h-[250px] lg:h-[300px]">
+                <div className="relative w-full h-[200px] sm:h-[220px] md:h-[250px] lg:h-[250px]">
                   {mediaItem.type === 'video' ? (
                     <video
                       src={mediaItem.src}
@@ -324,10 +315,12 @@ export default function Carousel() {
                       }}
                     />
                   ) : (
-                    <img
+                    <Image
                       src={mediaItem.src}
                       alt={`MDB Community Photo ${index + 1}`}
                       className="w-full h-full object-cover rounded-2xl"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
                       onError={(e) => {
                         console.error('Image failed to load:', mediaItem.src, e)
                         const imgElement = e.target as HTMLImageElement
@@ -347,11 +340,7 @@ export default function Carousel() {
                   )}
                 </div>
                 {/* Caption card - slides out from underneath */}
-                <div className={`absolute top-[171px] sm:top-[191px] md:top-[221px] lg:top-[271px] left-0 right-0 bg-mdb-blue text-white text-sm px-4 py-3 rounded-b-2xl shadow-lg transform -translate-y-4 opacity-0 group-hover:translate-y-4 group-hover:opacity-100 z-10 text-center ${
-                  shouldReduceAnimations 
-                    ? 'transition-all duration-200 ease-out' 
-                    : 'transition-all duration-300 ease-out'
-                }`}>
+                <div className="absolute top-[171px] sm:top-[191px] md:top-[221px] lg:top-[220px] left-0 right-0 bg-mdb-blue text-white text-sm px-4 py-3 rounded-b-2xl shadow-lg transform -translate-y-4 opacity-0 group-hover:translate-y-4 group-hover:opacity-100 z-10 text-center transition-all duration-200 ease-out">
                   {duplicatedCaptions2[index]}
                 </div>
               </div>
@@ -370,14 +359,10 @@ export default function Carousel() {
             {duplicatedMedia3.map((mediaItem: any, index: number) => (
               <div 
                 key={`third-${index}`} 
-                className={`group flex-shrink-0 w-[280px] sm:w-[320px] md:w-[360px] lg:w-[400px] relative mx-2 sm:mx-3 md:mx-4 transition-all transform origin-center mt-6 ${
-                  shouldReduceAnimations 
-                    ? 'hover:scale-105 hover:translate-x-0.5 duration-200 hover:drop-shadow-md' 
-                    : 'hover:scale-110 hover:translate-x-1 duration-300 hover:drop-shadow-xl'
-                }`}
+                className="group flex-shrink-0 w-[280px] sm:w-[320px] md:w-[360px] lg:w-[400px] relative mx-2 sm:mx-3 md:mx-4 transition-all transform origin-center mt-6 hover:scale-105 hover:translate-x-0.5 duration-200 hover:drop-shadow-md"
               >
                 {/* Media container */}
-                <div className="relative w-full h-[200px] sm:h-[220px] md:h-[250px] lg:h-[300px]">
+                <div className="relative w-full h-[200px] sm:h-[220px] md:h-[250px] lg:h-[250px]">
                   {mediaItem.type === 'video' ? (
                     <video
                       src={mediaItem.src}
@@ -408,10 +393,12 @@ export default function Carousel() {
                       }}
                     />
                   ) : (
-                    <img
+                    <Image
                       src={mediaItem.src}
                       alt={`MDB Community Photo ${index + 1}`}
                       className="w-full h-full object-cover rounded-2xl"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
                       onError={(e) => {
                         console.error('Image failed to load:', mediaItem.src, e)
                         const imgElement = e.target as HTMLImageElement
@@ -420,7 +407,7 @@ export default function Carousel() {
                         if (parent) {
                           const fallback = document.createElement('div')
                           fallback.className = 'w-full h-full bg-gray-200 rounded-2xl flex items-center justify-center'
-                          fallback.innerHTML = '<span class="text-gray-500">Image unavailable</span>'
+                          fallback.innerHTML = '<span class=\"text-gray-500\">Image unavailable</span>'
                           parent.appendChild(fallback)
                         }
                       }}
@@ -431,11 +418,7 @@ export default function Carousel() {
                   )}
                 </div>
                 {/* Caption card - slides out from underneath */}
-                <div className={`absolute top-[171px] sm:top-[191px] md:top-[221px] lg:top-[271px] left-0 right-0 bg-mdb-blue text-white text-sm px-4 py-3 rounded-b-2xl shadow-lg transform -translate-y-4 opacity-0 group-hover:translate-y-4 group-hover:opacity-100 z-10 text-center ${
-                  shouldReduceAnimations 
-                    ? 'transition-all duration-200 ease-out' 
-                    : 'transition-all duration-300 ease-out'
-                }`}>
+                <div className="absolute top-[171px] sm:top-[191px] md:top-[221px] lg:top-[250px] left-0 right-0 bg-mdb-blue text-white text-sm px-4 py-3 rounded-b-2xl shadow-lg transform -translate-y-4 opacity-0 group-hover:opacity-100 z-10 text-center transition-all duration-200 ease-out">
                   {duplicatedCaptions3[index]}
                 </div>
               </div>

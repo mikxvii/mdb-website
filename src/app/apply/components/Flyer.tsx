@@ -1,5 +1,7 @@
 'use client'
 import Image from 'next/image'
+// Hydration fix: detect screen size on client
+// ...existing code...
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useAnimationPreferences } from '../../hooks/useAnimationPreferences'
@@ -7,6 +9,22 @@ import { useAnimationPreferences } from '../../hooks/useAnimationPreferences'
 export default function Flyer() {
   const [isLoaded, setIsLoaded] = useState(false)
   const { shouldReduceAnimations } = useAnimationPreferences()
+  // Hydration fix: track screen size
+  const [isMobile, setIsMobile] = useState<null | boolean>(null)
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    // Mark as client-side to prevent hydration mismatch
+    setIsClient(true)
+    
+    // Set isMobile on client only
+    function handleResize() {
+      setIsMobile(window.innerWidth < 640)
+    }
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     // Trigger animation on next frame to prevent flash
@@ -40,21 +58,45 @@ export default function Flyer() {
             </p>
           </div>
 
-          {/* Large Image */}
+          {/* Large Image - Desktop: fa25_web.png, Mobile: fa25_mobile.png */}
           <div className={`relative mb-12 transition-all ${transitionDuration} ease-out ${delay} ${
             isLoaded 
               ? 'translate-y-0' 
               : 'translate-y-8'
           }`}>
             <div className="relative w-full rounded-2xl overflow-hidden shadow-2xl bg-gray-100">
-              <Image
-                src="/images/recruit-fall-25.png"
-                alt="MDB Mobile Development Community"
-                width={800}
-                height={1200}
-                className="w-full h-auto object-contain"
-                priority
-              />
+              {/* Hydration fix: Always render the same structure, then update on client */}
+              {!isClient ? (
+                // Server-side: Always render desktop image to prevent hydration mismatch
+                <Image
+                  src="/images/fa25_web.png"
+                  alt="MDB Recruitment Flyer"
+                  width={800}
+                  height={1200}
+                  className="w-full h-auto object-contain"
+                  priority
+                />
+              ) : isMobile ? (
+                // Client-side: Show mobile image if on mobile
+                <Image
+                  src="/images/fa25_mobile.png"
+                  alt="MDB Recruitment Flyer Mobile"
+                  width={800}
+                  height={1200}
+                  className="w-full h-auto object-contain"
+                  priority
+                />
+              ) : (
+                // Client-side: Show desktop image if on desktop
+                <Image
+                  src="/images/fa25_web.png"
+                  alt="MDB Recruitment Flyer Desktop"
+                  width={800}
+                  height={1200}
+                  className="w-full h-auto object-contain"
+                  priority
+                />
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
             </div>
           </div>

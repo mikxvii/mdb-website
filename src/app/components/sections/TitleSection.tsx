@@ -23,7 +23,7 @@ export default function TitleSection() {
               width={2000}
               height={2000}
               priority
-
+              sizes="(max-width: 640px) 340px, (max-width: 768px) 400px, (max-width: 1024px) 460px, (max-width: 1280px) 600px, 720px"
               className={`w-[340px] h-[340px] sm:w-[400px] sm:h-[400px] md:w-[460px] md:h-[460px] lg:w-[600px] lg:h-[600px] xl:w-[720px] xl:h-[720px] object-contain transition-all duration-1000 ease-out ${
                 isLoaded 
                   ? 'translate-y-0' 

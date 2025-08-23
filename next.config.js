@@ -8,14 +8,24 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   
+  // Enable static generation and caching
+  generateEtags: true,
+  compress: true,
+  
+  // Optimize bundle splitting and caching
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['@next/font'],
+  },
+  
   // Image optimization
   images: {
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
-    // Temporarily disable optimization to debug image loading
-    unoptimized: true,
+    // Re-enable optimization for production
+    unoptimized: false,
     // Add better error handling
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
@@ -37,18 +47,10 @@ const nextConfig = {
     return config
   },
   
-  // Configure static file serving with better caching
+  // Configure static file serving with comprehensive caching
   async headers() {
     return [
-      {
-        source: '/videos/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
+      // Static assets - long-term caching (1 year)
       {
         source: '/images/:path*',
         headers: [
@@ -64,6 +66,64 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/videos/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/assets/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Next.js static files - long-term caching
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Fonts - long-term caching
+      {
+        source: '/fonts/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // HTML pages - shorter caching for dynamic content
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, must-revalidate',
+          },
+        ],
+      },
+      // API routes - no caching for dynamic data
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
           },
         ],
       },
