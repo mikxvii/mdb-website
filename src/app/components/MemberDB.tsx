@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface MemberDBProps {
   name: string
@@ -9,11 +9,19 @@ interface MemberDBProps {
   image: string
   size?: 'small' | 'medium' | 'large'
   className?: string
+  calendly?: string
 }
 
-export default function MemberDB({ name, title, image, size = 'medium', className = '' }: MemberDBProps) {
+export default function MemberDB({ name, title, image, size = 'medium', className = '', calendly }: MemberDBProps) {
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+  
+  // Mark as client-side to prevent hydration mismatch
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
   const sizeClasses = {
     small: {
       container: 'w-28 h-28',
@@ -40,22 +48,23 @@ export default function MemberDB({ name, title, image, size = 'medium', classNam
   return (
     <div className={`text-center hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-xl origin-center ${className}`}>
       <div className={`mdb-glass relative mx-auto mb-3 overflow-hidden rounded-lg border-8 ${currentSize.container}`}>
-        {!imageLoaded && !imageError && (
+        {/* Always render the same structure to prevent hydration mismatch */}
+        {!isClient || (!imageLoaded && !imageError) ? (
           <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-lg" />
-        )}
+        ) : null}
         <Image
           src={image}
           alt={name}
           fill
           className={`object-cover rounded-lg transition-opacity duration-300 ${
-            imageLoaded ? 'opacity-100' : 'opacity-0'
+            isClient && imageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
           onLoad={() => setImageLoaded(true)}
           onError={() => setImageError(true)}
           loading="lazy"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
-        {imageError && (
+        {isClient && imageError && (
           <div className="absolute inset-0 bg-gray-300 rounded-lg flex items-center justify-center">
             <span className="text-gray-500 text-xs">Image not available</span>
           </div>
@@ -64,6 +73,16 @@ export default function MemberDB({ name, title, image, size = 'medium', classNam
       <div className={`${currentSize.card} -mt-2 relative z-10`}>
         <h3 className={`font-semibold text-gray-800 mb-1 ${currentSize.name}`}>{name}</h3>
         <p className={`text-gray-600 ${currentSize.title}`}>{title}</p>
+        {calendly && (
+          <a
+            href={calendly}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block mt-2 px-3 py-1 bg-mdb-blue text-white rounded hover:bg-mdb-dark-blue transition"
+          >
+            Schedule Coffee Chat
+          </a>
+        )}
       </div>
     </div>
   )
