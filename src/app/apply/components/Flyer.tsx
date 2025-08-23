@@ -40,21 +40,35 @@ export default function Flyer() {
             </p>
           </div>
 
-          {/* Large Image */}
+          {/* Large Image - Desktop: fa25_web.png, Mobile: fa25_mobile.png */}
           <div className={`relative mb-12 transition-all ${transitionDuration} ease-out ${delay} ${
             isLoaded 
               ? 'translate-y-0' 
               : 'translate-y-8'
           }`}>
             <div className="relative w-full rounded-2xl overflow-hidden shadow-2xl bg-gray-100">
-              <Image
-                src="/images/recruit-fall-25.png"
-                alt="MDB Mobile Development Community"
-                width={800}
-                height={1200}
-                className="w-full h-auto object-contain"
-                priority
-              />
+              {/* Desktop image */}
+              <div className="hidden sm:block">
+                <Image
+                  src="/images/fa25_web.png"
+                  alt="MDB Recruitment Flyer Desktop"
+                  width={800}
+                  height={1200}
+                  className="w-full h-auto object-contain"
+                  priority
+                />
+              </div>
+              {/* Mobile image */}
+              <div className="block sm:hidden">
+                <Image
+                  src="/images/fa25_mobile.png"
+                  alt="MDB Recruitment Flyer Mobile"
+                  width={800}
+                  height={1200}
+                  className="w-full h-auto object-contain"
+                  priority
+                />
+              </div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
             </div>
           </div>
