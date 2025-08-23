@@ -78,9 +78,10 @@ export default function MemberDB({ name, title, image, size = 'medium', classNam
             href={calendly}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block mt-2 px-3 py-1 bg-mdb-blue text-white rounded hover:bg-mdb-dark-blue transition"
+            className="inline-block mt-3 bg-mdb-blue text-white px-4 py-2 rounded-xl font-raleway-semibold text-sm hover:bg-mdb-gold hover:text-mdb-blue hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-lg origin-center shadow-lg"
           >
             Schedule Coffee Chat
+            <span className="ml-1 text-sm">→</span>
           </a>
         )}
       </div>
