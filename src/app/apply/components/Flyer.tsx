@@ -69,7 +69,7 @@ export default function Flyer() {
               {!isClient ? (
                 // Server-side: Always render desktop image to prevent hydration mismatch
                 <Image
-                  src="/images/fa25_web.png"
+                  src="/images/flyer_web_2.png"
                   alt="MDB Recruitment Flyer"
                   width={800}
                   height={1200}
@@ -79,7 +79,7 @@ export default function Flyer() {
               ) : isMobile ? (
                 // Client-side: Show mobile image if on mobile
                 <Image
-                  src="/images/fa25_mobile.png"
+                  src="/images/fa25_mobile_2.png"
                   alt="MDB Recruitment Flyer Mobile"
                   width={800}
                   height={1200}
