@@ -10,28 +10,28 @@ interface CurriculumModule {
 const curriculumModules: CurriculumModule[] = [
   {
     week: "Week 1",
-    title: "Introduction to Mobile Development",
-    description: "Introducing the club, onboarding students to MDB tech stack, and general software engineering concepts."
+    title: "Intro to Mobile Development",
+    description: "Kick off the semester with an introduction to mobile development, MDB's tech stack, and essential software engineering concepts."
   },
   {
-    week: "Weeks 2/3",
-    title: "General Mobile Development with React Native",
-    description: "General software development in React Native, including mini projects."
+    week: "Week 2-3",
+    title: "General Mobile Dev with React Native",
+    description: "Learn the fundamentals of building cross-platform mobile apps using React Native, including hands-on mini projects."
   },
   {
-    week: "Week 3/4",
-    title: "Native Mobile Development with Swift",
-    description: "Native features, hardware integration, and introducing app development in Swift."
+    week: "Week 3-4",
+    title: "General Mobile Dev with Swift",
+    description: "Dive into native iOS development with Swift, exploring hardware integration and app development best practices."
   },
   {
-    week: "Week 4/5",
-    title: "Applied Mobile Development with Machine Learning and Edge Computing",
-    description: "TensorFlow Lite and Apple's CreateML, and the intersection of CNNs with mobile development."
+    week: "Week 4-5",
+    title: "Applied Mobile Dev, Machine Learning, and Edge Computing",
+    description: "Explore the intersection of mobile development with machine learning and edge computing using tools like TensorFlow Lite and Apple's CreateML."
   },
   {
-    week: "Weeks 7/8/9/10",
+    week: "Week 6-10",
     title: "Newbie Project",
-    description: "A newbie project involving students working as a giant team."
+    description: "Work in teams to build and launch a real mobile app, applying everything you've learned throughout the training program."
   }
 ]
 
@@ -84,14 +84,15 @@ export default function TrainingCurriculum() {
               {curriculumModules.map((module, index) => (
                 <div 
                   key={index} 
-                  className="mdb-glass mdb-glass-hover p-8"
+                  className="mdb-glass mdb-glass-hover p-8 flex items-start gap-6"
                 >
-                  <h3 className="text-xl font-bold text-gray-800 mb-3">
-                    {module.week} - {module.title}
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    {module.description}
-                  </p>
+                  <div className="flex flex-col items-center min-w-[90px]">
+                    <span className="block text-lg font-bold text-mdb-blue mb-1 tracking-wide">{module.week}</span>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-2xl font-bold text-blue-900 tracking-wide mb-1">{module.title}</h3>
+                    <p className="text-gray-700 leading-relaxed mt-1">{module.description}</p>
+                  </div>
                 </div>
               ))}
             </div>
