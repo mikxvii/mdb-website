@@ -5,7 +5,7 @@ export default function Apply() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-mdb-light-blue to-white">
       <Flyer />
-      <Calendly />
+      {/* <Calendly /> */}
     </div>
   )
 } 

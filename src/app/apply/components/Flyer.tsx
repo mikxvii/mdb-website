@@ -9,6 +9,11 @@ import { useAnimationPreferences } from '../../hooks/useAnimationPreferences'
 export default function Flyer() {
   const [isLoaded, setIsLoaded] = useState(false)
   const { shouldReduceAnimations } = useAnimationPreferences()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   // Hydration fix: track screen size
   const [isMobile, setIsMobile] = useState<null | boolean>(null)
   const [isClient, setIsClient] = useState(false)
@@ -35,8 +40,13 @@ export default function Flyer() {
     return () => cancelAnimationFrame(timer)
   }, [])
 
-  const transitionDuration = shouldReduceAnimations ? 'duration-500' : 'duration-1000'
-  const delay = shouldReduceAnimations ? 'delay-150' : 'delay-300'
+  // Use default values on first render to match SSR, then update after mount
+  const transitionDuration = mounted
+    ? (shouldReduceAnimations ? 'duration-500' : 'duration-1000')
+    : 'duration-1000'
+  const delay = mounted
+    ? (shouldReduceAnimations ? 'delay-150' : 'delay-300')
+    : 'delay-300'
 
   return (
     <section className="min-h-screen w-screen bg-gradient-to-b from-mdb-light-blue to-white flex items-center -mt-20 relative mb-0 py-8 md:py-12 lg:py-16">
@@ -56,47 +66,35 @@ export default function Flyer() {
               Become part of UC Berkeley&apos;s premier mobile development community. 
               Learn, build, and grow with passionate developers who share your vision.
             </p>
+            {/* Apply Now Button below header */}
+            <div className="mt-8">
+              <Link 
+                href="https://airtable.com/appLKEFdFTOMP791d/pagX5V2U6ZzoOY12Q/form"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-mdb-blue text-white px-8 md:px-12 py-4 md:py-5 rounded-xl font-raleway-semibold text-lg md:text-xl hover:bg-mdb-gold hover:text-mdb-blue hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-lg origin-center shadow-xl"
+              >
+                Apply Now
+                <span className="ml-2 text-xl">→</span>
+              </Link>
+            </div>
           </div>
 
-          {/* Large Image - Desktop: fa25_web.png, Mobile: fa25_mobile.png */}
+          {/* Large Image - Always render the original image to prevent hydration errors */}
           <div className={`relative mb-12 transition-all ${transitionDuration} ease-out ${delay} ${
             isLoaded 
               ? 'translate-y-0' 
               : 'translate-y-8'
           }`}>
             <div className="relative w-full rounded-2xl overflow-hidden shadow-2xl bg-gray-100">
-              {/* Hydration fix: Always render the same structure, then update on client */}
-              {!isClient ? (
-                // Server-side: Always render desktop image to prevent hydration mismatch
-                <Image
-                  src="/images/flyer_web_2.png"
-                  alt="MDB Recruitment Flyer"
-                  width={800}
-                  height={1200}
-                  className="w-full h-auto object-contain"
-                  priority
-                />
-              ) : isMobile ? (
-                // Client-side: Show mobile image if on mobile
-                <Image
-                  src="/images/fa25_mobile_2.png"
-                  alt="MDB Recruitment Flyer Mobile"
-                  width={800}
-                  height={1200}
-                  className="w-full h-auto object-contain"
-                  priority
-                />
-              ) : (
-                // Client-side: Show desktop image if on desktop
-                <Image
-                  src="/images/fa25_web.png"
-                  alt="MDB Recruitment Flyer Desktop"
-                  width={800}
-                  height={1200}
-                  className="w-full h-auto object-contain"
-                  priority
-                />
-              )}
+              <Image
+              src="/images/Official BACK COVER.png"
+              alt="MDB Recruitment Flyer"
+              width={800}
+              height={1200}
+              className="w-full h-auto object-contain"
+              priority
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
             </div>
           </div>
@@ -211,12 +209,23 @@ export default function Flyer() {
               : 'translate-y-8'
           }`}>
             <Link 
-              href="#application-form"
+              href="https://airtable.com/appLKEFdFTOMP791d/pagX5V2U6ZzoOY12Q/form"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-block bg-mdb-blue text-white px-8 md:px-12 py-4 md:py-5 rounded-xl font-raleway-semibold text-lg md:text-xl hover:bg-mdb-gold hover:text-mdb-blue hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-lg origin-center shadow-xl"
             >
               Apply Now
               <span className="ml-2 text-xl">→</span>
             </Link>
+            <div className="mt-6">
+              <Link
+                href="/contact"
+                className="inline-block bg-white border-2 border-mdb-blue text-mdb-blue px-8 md:px-12 py-4 md:py-5 rounded-xl font-raleway-semibold text-lg md:text-xl hover:bg-mdb-blue hover:text-white hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-lg origin-center shadow-xl"
+              >
+                Questions? Contact Us
+                <span className="ml-2 text-xl">→</span>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
