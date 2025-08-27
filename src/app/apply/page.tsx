@@ -21,7 +21,6 @@ export default function Apply() {
               className="airtable-embed" 
               src="https://airtable.com/embed/appq3RmOWy9QA681J/shrUKa4jqpHS5BruB" 
               frameBorder="0" 
-              onMouseWheel="" 
               width="100%" 
               height="533" 
               style={{ background: 'transparent', border: '1px solid #ccc' }}
