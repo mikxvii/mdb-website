@@ -71,6 +71,13 @@ export default function TitleSection() {
               >
                 Contact Us
               </Link>
+              {/* Coffee Chat Button */}
+              <Link 
+                href="https://airtable.com/embed/appq3RmOWy9QA681J/shrUKa4jqpHS5BruB"
+                className="border-2 border-mdb-blue text-mdb-blue bg-white/80 backdrop-blur-sm px-6 md:px-8 py-3 md:py-3 rounded-xl font-semibold text-[clamp(0.6875rem,2.2vw,1.05rem)] hover:bg-mdb-blue hover:text-white hover:scale-110 hover:translate-x-1 transition-all duration-300 transform hover:drop-shadow-lg origin-center min-w-[120px] md:min-w-[140px]"
+              >
+                Coffee Chats
+              </Link>
             </div>
           </div>
         </div>
