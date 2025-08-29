@@ -22,7 +22,7 @@ export default function Apply() {
               src="https://airtable.com/embed/appq3RmOWy9QA681J/shrUKa4jqpHS5BruB" 
               frameBorder="0" 
               width="100%" 
-              height="533" 
+              height="1100" 
               style={{ background: 'transparent', border: '1px solid #ccc' }}
             />
           </div>
