@@ -5,7 +5,6 @@ export const members: Member[] = [
   { name: "Alex Kim", title: "Member", image: "/favicon.svg" },
   { name: "Angie Zhu", title: "Member", image: "/members/angie.png" },
   { name: "Alp Senay", title: "Member", image: "/members/alp.jpg" },  
-  { name: "Arnav Khinvasara", title: "Member", image: "/members/arnav.jpg" },
   { name: "Cathryn Chang", title: "Member", image: "/members/cathryn.JPG" },
   { name: "Christy Cheung", title: "Member", image: "/members/christy.jpg" },
   { name: "Chryssa Vamvaka", title: "Member", image: "/members/chryssa.jpeg" },
